@@ -14,6 +14,20 @@ _batch_jobs_lock = threading.Lock()
 
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp'}
 
+def _resolve_image_path(filename, app=None):
+    """Cherche un fichier dans uploads_temp d'abord, puis dans uploads."""
+    from flask import current_app as _ca
+    ctx = app or _ca
+    temp_folder = ctx.config['UPLOAD_TEMP_FOLDER']
+    perm_folder = ctx.config['UPLOAD_FOLDER']
+    temp_path = os.path.join(temp_folder, filename)
+    if os.path.exists(temp_path):
+        return temp_path
+    perm_path = os.path.join(perm_folder, filename)
+    if os.path.exists(perm_path):
+        return perm_path
+    return None  # introuvable
+
 def _analyser_un_fichier(image_path, filename, zones_config, cadre_reference):
     """Analyse un seul fichier — utilisé par le ThreadPoolExecutor."""
     try:
@@ -54,7 +68,7 @@ def api_analyser():
     # 1. Determine Image Path
     image_path = None
     if filename:
-        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        image_path = _resolve_image_path(filename)
     elif 'image_path' in session:
         image_path = session['image_path']
         
@@ -115,15 +129,15 @@ def api_analyser_batch():
     if not filenames:
         return jsonify({'error': 'No filenames provided'}), 400
     
-    upload_folder = current_app.config['UPLOAD_FOLDER']
+    upload_folder = current_app.config['UPLOAD_TEMP_FOLDER']
     resultats_batch = []
     reussis = 0
     echoues = 0
     
     for filename in filenames:
-        image_path = os.path.join(upload_folder, filename)
+        image_path = _resolve_image_path(filename)
         
-        if not os.path.exists(image_path):
+        if not image_path:
             resultats_batch.append({
                 'filename': filename,
                 'success': False,
@@ -166,7 +180,6 @@ def api_analyser_batch_async():
         return jsonify({'error': 'No filenames provided'}), 400
     
     job_id = str(uuid.uuid4())
-    upload_folder = current_app.config['UPLOAD_FOLDER']
     app = current_app._get_current_object()
     
     job = {
@@ -188,8 +201,8 @@ def api_analyser_batch_async():
                 with _batch_jobs_lock:
                     job['current_file'] = filename
                 
-                image_path = os.path.join(upload_folder, filename)
-                if not os.path.exists(image_path):
+                image_path = _resolve_image_path(filename, app)
+                if not image_path:
                     with _batch_jobs_lock:
                         job['resultats_batch'].append({
                             'filename': filename,

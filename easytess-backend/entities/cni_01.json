@@ -1,15 +1,15 @@
 {
   "nom": "cni_01",
   "description": "CNI DZ",
-  "date_creation": "2026-03-01T02:30:30.624263",
-  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\temp_entite_7c631fa9-1701-4b50-9510-d40c8fbfe400_cni_dz_recto.jpeg",
+  "date_creation": "2026-03-02T04:38:13.843962",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\temp_entite_61587faa-fe59-4b0f-ac40-b3ff59f03ae9_cni_dz_recto.jpeg",
   "zones": [
     {
       "coords": [
         0.4754285714285715,
-        0.6,
+        0.4845238095238095,
         0.8805142857142858,
-        0.68
+        0.5876190476190477
       ],
       "id": 1772213579118,
       "lang": "ara",
@@ -20,9 +20,9 @@
     {
       "coords": [
         0.4691628571428572,
-        0.712,
+        0.6288571428571429,
         0.8805142857142858,
-        0.79
+        0.729375
       ],
       "id": 1772213715915,
       "lang": "ara",
@@ -33,9 +33,9 @@
     {
       "coords": [
         0.0018571428571428667,
-        0.22,
+        -0.011622023809523822,
         0.25685714285714284,
-        0.32
+        0.09791666666666665
       ],
       "id": 1772213923566,
       "lang": "fra",
@@ -46,9 +46,9 @@
     {
       "coords": [
         0.5351714285714286,
-        0.815,
+        0.7615922619047618,
         0.7945428571428571,
-        0.875
+        0.8389136904761905
       ],
       "id": 1772327207422,
       "lang": "fra",
@@ -59,9 +59,9 @@
     {
       "coords": [
         0.4171428571428571,
-        0.874,
+        0.8376250000000002,
         0.7967285714285715,
-        0.94
+        0.9226785714285713
       ],
       "id": 1772327343338,
       "lang": "ara",
@@ -72,9 +72,9 @@
     {
       "coords": [
         0.2714285714285714,
-        0.81,
+        0.7551488095238096,
         0.3734285714285714,
-        0.88
+        0.845357142857143
       ],
       "id": 1772327815404,
       "lang": "ara+fra",
@@ -85,10 +85,12 @@
   ],
   "cadre_reference": {
     "haut": {
-      "labels": [],
+      "labels": [
+        "regex:\\d{9}"
+      ],
       "position_base": [
-        0.5,
-        0
+        0.39441930618401205,
+        0.22401847575057737
       ],
       "offset_x": 0,
       "offset_y": 0
@@ -127,8 +129,8 @@
       "height": 433
     },
     "dimensions_absolues": {
-      "largeur": 0,
-      "hauteur": 0,
+      "largeur": 455,
+      "hauteur": 336,
       "angle": 0
     }
   },

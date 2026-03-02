@@ -1008,12 +1008,14 @@ export class EntityCreatorComponent implements AfterViewInit, OnInit {
                         this.cadreHaut.set({
                             labels_str: cadre.haut.labels.join(', '),
                             position_base: cadre.haut.position_base,
+                            template_coords: cadre.haut.template_coords,
                             offset_x: cadre.haut.offset_x || 0,
                             offset_y: cadre.haut.offset_y || 0
                         });
                         this.cadreDroite.set({
                             labels_str: cadre.droite.labels.join(', '),
                             position_base: cadre.droite.position_base,
+                            template_coords: cadre.droite.template_coords,
                             offset_x: cadre.droite.offset_x || 0,
                             offset_y: cadre.droite.offset_y || 0
                         });
@@ -1024,12 +1026,14 @@ export class EntityCreatorComponent implements AfterViewInit, OnInit {
                             this.cadreGauche.set({
                                 labels_str: cadre.gauche.labels.join(', '),
                                 position_base: cadre.gauche.position_base,
+                                template_coords: cadre.gauche.template_coords,
                                 offset_x: cadre.gauche.offset_x || 0,
                                 offset_y: cadre.gauche.offset_y || 0
                             });
                             this.cadreBas.set({
                                 labels_str: cadre.bas.labels.join(', '),
                                 position_base: cadre.bas.position_base,
+                                template_coords: cadre.bas.template_coords,
                                 offset_x: cadre.bas.offset_x || 0,
                                 offset_y: cadre.bas.offset_y || 0
                             });
@@ -1121,12 +1125,19 @@ export class EntityCreatorComponent implements AfterViewInit, OnInit {
 
                 // Charger l'image de référence si elle existe
                 if (entite.image_reference) {
-                    // Extraire juste le nom du fichier (gérer / et \ pour Windows)
-                    const parts = entite.image_reference.split(/[/\\]/);
-                    const filename = parts.pop() || entite.image_reference;
-                    const imageUrl = `http://localhost:8082/uploads/${filename}`;
+                    // Extraire le chemin relatif au dossier 'uploads/'
+                    const normalized = entite.image_reference.replace(/\\/g, '/');
+                    const uploadsIndex = normalized.indexOf('/uploads/');
+                    let relativeFilename: string;
+                    if (uploadsIndex !== -1) {
+                        relativeFilename = normalized.substring(uploadsIndex + '/uploads/'.length);
+                    } else {
+                        relativeFilename = normalized.split('/').pop() || normalized;
+                    }
+                    const imageUrl = `http://localhost:8082/uploads/${relativeFilename}`;
                     this.imageUrl.set(imageUrl);
-                    this.uploadedImageFilename.set(filename);
+                    // Pour la détection, on utilise le chemin relatif au dossier uploads
+                    this.uploadedImageFilename.set(relativeFilename);
 
                     setTimeout(() => {
                         this.loadImageOnCanvas(imageUrl);

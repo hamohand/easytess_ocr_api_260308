@@ -66,10 +66,41 @@ def find_template_orb(image_path: str, template_path: str, min_matches: int = 10
                 
                 if len(matches) >= min_matches:
                     good_matches = matches[:min(min_matches * 2, len(matches))]
-                    pts = np.float32([kp2[m.trainIdx].pt for m in good_matches])
-                    center = pts.mean(axis=0)
-                    x_min, y_min = pts.min(axis=0)
-                    x_max, y_max = pts.max(axis=0)
+                    
+                    # Extract location of good matches
+                    src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+                    dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+                    
+                    # Calculate homography and transform template corners to get exact bounding box
+                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+                    
+                    is_valid_transform = False
+                    if M is not None:
+                        # Transform template corners
+                        pts_template_corners = np.float32([[0, 0], [0, th - 1], [tw - 1, th - 1], [tw - 1, 0]]).reshape(-1, 1, 2)
+                        dst_corners = cv2.perspectiveTransform(pts_template_corners, M)
+                        
+                        # Validate the transformed polygon
+                        area = cv2.contourArea(dst_corners)
+                        orig_area = tw * th
+                        is_convex = cv2.isContourConvex(np.int32(dst_corners))
+                        
+                        # The bounding box should remain a reasonable size and convex
+                        if is_convex and (0.1 * orig_area < area < 10.0 * orig_area):
+                            is_valid_transform = True
+                            center = np.mean(dst_corners[:, 0, :], axis=0)
+                            x_min = np.min(dst_corners[:, 0, 0])
+                            y_min = np.min(dst_corners[:, 0, 1])
+                            x_max = np.max(dst_corners[:, 0, 0])
+                            y_max = np.max(dst_corners[:, 0, 1])
+                            
+                    if not is_valid_transform:
+                        # Fallback to keypoints if homography fails or gives invalid results
+                        pts = dst_pts.reshape(-1, 2)
+                        center = pts.mean(axis=0)
+                        x_min, y_min = pts.min(axis=0)
+                        x_max, y_max = pts.max(axis=0)
+                        
                     avg_distance = np.mean([m.distance for m in good_matches])
                     
                     result = {

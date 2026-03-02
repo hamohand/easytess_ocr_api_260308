@@ -16,6 +16,7 @@ def create_app(config_class=Config):
     
     # Ensure directories exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['UPLOAD_TEMP_FOLDER'], exist_ok=True)
     entities_folder = app.config['ENTITIES_FOLDER']
     os.makedirs(entities_folder, exist_ok=True)
     

@@ -1,8 +1,8 @@
 {
   "nom": "pp_01",
   "description": "Passeport DZ",
-  "date_creation": "2026-03-01T03:09:46.316775",
-  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\temp_entite_66903162-0c1e-491c-9a96-d7d3bc82a863_pp_Moh_moit.png",
+  "date_creation": "2026-03-02T20:13:04.383230",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\pp_01\\reference.png",
   "zones": [
     {
       "coords": [
@@ -83,16 +83,20 @@
       "type": "text"
     },
     {
-      "id": 1772330900369,
-      "nom": "sexe",
-      "type": "text",
-      "lang": "ara",
-      "preprocess": "arabic_textured",
       "coords": [
-        0.6057471264367816,
-        0.39692741935483866,
-        0.6339080459770114,
-        0.4611995967741935
+        0.6006269592476489,
+        0.3889112903225806,
+        0.636980146290491,
+        0.47479838709677413
+      ],
+      "id": 1772330900369,
+      "lang": "ara",
+      "nom": "sexe",
+      "preprocess": "arabic_textured",
+      "type": "text",
+      "valeurs_attendues": [
+        "ذ",
+        "ا"
       ]
     }
   ],
@@ -144,8 +148,8 @@
       "height": 710
     },
     "dimensions_absolues": {
-      "largeur": 0,
-      "hauteur": 0,
+      "largeur": 957,
+      "hauteur": 496,
       "angle": 0
     }
   },

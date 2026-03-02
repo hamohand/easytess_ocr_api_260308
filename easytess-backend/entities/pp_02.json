@@ -1,0 +1,93 @@
+{
+  "nom": "pp_02",
+  "description": "essai image droite",
+  "date_creation": "2026-03-02T20:11:40.330212",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\pp_02\\reference.png",
+  "zones": [
+    {
+      "id": 1772478694542,
+      "nom": "Zone 1",
+      "type": "text",
+      "lang": "ara+fra",
+      "preprocess": "auto",
+      "coords": [
+        0.2873572239502643,
+        0.15486419753086422,
+        0.4409966414050071,
+        0.2054115226337449
+      ]
+    }
+  ],
+  "cadre_reference": {
+    "haut": {
+      "labels": [
+        "regex:DZA"
+      ],
+      "position_base": [
+        0.503061224489796,
+        0.1323943661971831
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "droite": {
+      "labels": [],
+      "position_base": [
+        0.9438775510204082,
+        0.3542253521126761
+      ],
+      "template_coords": [
+        0.8445,
+        0.2958,
+        0.9445,
+        0.4132
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "template_path": "templates/pp_02/droite_template.png"
+    },
+    "gauche": {
+      "labels": [],
+      "position_base": [
+        0.03265305981040001,
+        0.6572340130805969
+      ],
+      "template_coords": [
+        0.0108,
+        0.2122,
+        0.2558,
+        0.6181
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "template_path": "templates/pp_02/gauche_template.png"
+    },
+    "bas": {
+      "labels": [
+        "regex:P<DZA"
+      ],
+      "position_base": [
+        0.4683673469387755,
+        0.8169014084507042
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "image_base_dimensions": {
+      "width": 980,
+      "height": 710
+    },
+    "dimensions_absolues": {
+      "largeur": 893,
+      "hauteur": 486,
+      "angle": 0
+    }
+  },
+  "metadata": {
+    "nombre_zones": 1,
+    "image_dimensions": {
+      "width": 980,
+      "height": 710
+    }
+  }
+}

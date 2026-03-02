@@ -46,14 +46,15 @@ def upload_image_entite():
         
     filename = secure_filename(file.filename)
     saved_filename = f"temp_entite_{str(uuid.uuid4())}_{filename}"
-    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], saved_filename)
+    temp_folder = current_app.config['UPLOAD_TEMP_FOLDER']
+    filepath = os.path.join(temp_folder, saved_filename)
     file.save(filepath)
     
     # Conversion PDF -> Image si nécessaire
     if filename.lower().endswith('.pdf'):
         try:
             image_filename = f"{os.path.splitext(saved_filename)[0]}.jpg"
-            image_filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename)
+            image_filepath = os.path.join(temp_folder, image_filename)
             convert_pdf_to_image(filepath, image_filepath)
             
             # On bascule sur l'image pour la suite
@@ -70,10 +71,8 @@ def upload_image_entite():
     
     session['temp_image_path'] = filepath
     
-    # Construct URL for the image (assuming static serving is handled elsewhere or we return a path)
-    # We'll assume a static route exists for uploads.
     base_url = request.host_url.rstrip('/')
-    image_url = f"{base_url}/uploads/{saved_filename}" 
+    image_url = f"{base_url}/uploads_temp/{saved_filename}" 
     
     return jsonify({
         'success': True, 
@@ -143,6 +142,11 @@ def detecter_etiquettes():
     if not os.path.exists(image_path):
         return jsonify({'error': f'Image non trouvée: {filename}'}), 404
     
+    current_app.logger.info(f"📥 /detecter-etiquettes reçu: filename={filename}, etiquettes_keys={list(etiquettes.keys())}")
+    for k, v in etiquettes.items():
+        if isinstance(v, dict):
+            current_app.logger.info(f"  Ancre '{k}': labels={v.get('labels')}, has_template_coords={bool(v.get('template_coords'))}")
+    
     # Construire la config des ancres à partir des étiquettes
     ancres_config = []
     temp_files_to_cleanup = []
@@ -176,19 +180,24 @@ def detecter_etiquettes():
             'offset_y': offset_y
         }
         
-        # Gestion des templates image temporaires pour la détection
+        # Templates de détection temporaires -> uploads_temp
         if template_coords and len(template_coords) == 4 and image_path and os.path.exists(image_path):
             try:
                 temp_filename = f"temp_template_{uuid.uuid4()}_{etiquette_id}.png"
-                temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], temp_filename)
+                temp_path = os.path.join(current_app.config['UPLOAD_TEMP_FOLDER'], temp_filename)
                 
+                current_app.logger.info(f"📷 Extraction template pour '{etiquette_id}': coords={template_coords} -> {temp_path}")
                 if extract_and_save_template(image_path, template_coords, temp_path):
-                    anchor_conf['template_path'] = temp_filename # Relatif pour compatibilité
-                    anchor_conf['template_path_abs'] = temp_path # Absolu pour usage direct
+                    anchor_conf['template_path'] = temp_filename
+                    anchor_conf['template_path_abs'] = temp_path
                     temp_files_to_cleanup.append(temp_path)
-                    current_app.logger.info(f"📷 Template temporaire créé pour {etiquette_id}: {temp_path}")
+                    current_app.logger.info(f"  ✅ Template temporaire créé pour {etiquette_id}: {temp_path}")
+                else:
+                    current_app.logger.error(f"  ❌ extract_and_save_template retourné False pour {etiquette_id}")
             except Exception as e:
                 current_app.logger.error(f"❌ Erreur extraction template temporaire: {e}")
+        elif template_coords:
+            current_app.logger.warning(f"  ⚠️ Template coords reçus pour '{etiquette_id}' mais image non trouvée: image_exists={os.path.exists(image_path) if image_path else False}")
 
         ancres_config.append(anchor_conf)
     
@@ -302,6 +311,20 @@ def sauvegarder_entite():
     
     if not nom: return jsonify({'error': 'Nom manquant'}), 400
     if not zones: return jsonify({'error': 'Aucune zone définie'}), 400
+
+    # Copier l'image de référence dans un emplacement permanent
+    # (pour éviter que les fichiers temp soient supprimés entre sessions)
+    if image_path and os.path.exists(image_path):
+        import shutil
+        ext = os.path.splitext(image_path)[1] or '.png'
+        entity_images_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'entities', nom)
+        os.makedirs(entity_images_dir, exist_ok=True)
+        permanent_image_path = os.path.join(entity_images_dir, f"reference{ext}")
+        # Ne copier que si c'est un fichier différent (pas une recopi de lui-même)
+        if os.path.abspath(image_path) != os.path.abspath(permanent_image_path):
+            shutil.copy2(image_path, permanent_image_path)
+            current_app.logger.info(f"✅ Image de référence copiée vers: {permanent_image_path}")
+        image_path = permanent_image_path
 
     # NOUVEAU: Extraire et sauvegarder les templates d'ancres image si définis
     if cadre_reference and image_path and os.path.exists(image_path):

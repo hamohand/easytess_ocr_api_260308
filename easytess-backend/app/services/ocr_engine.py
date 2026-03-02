@@ -445,12 +445,18 @@ def detecter_ancres(mots_ocr, ancres_config, img_dims, seuil_similarite=0.7, ima
             # 2. Fallback: Recherche par Template Image (ORB)
             template_path = ancre.get('template_path_abs') # Priorité au chemin absolu (temp files)
             if not template_path:
-                 # Résoudre chemin relatif si nécessaire
+                 # Résoudre chemin relatif si nécessaire (cherche dans uploads_temp puis uploads)
                  rel_path = ancre.get('template_path')
                  if rel_path:
                      import flask
-                     upload_folder = flask.current_app.config.get('UPLOAD_FOLDER', 'uploads')
-                     template_path = os.path.join(upload_folder, rel_path)
+                     temp_folder = flask.current_app.config.get('UPLOAD_TEMP_FOLDER', 'uploads_temp')
+                     perm_folder = flask.current_app.config.get('UPLOAD_FOLDER', 'uploads')
+                     candidate_temp = os.path.join(temp_folder, rel_path)
+                     candidate_perm = os.path.join(perm_folder, rel_path)
+                     if os.path.exists(candidate_temp):
+                         template_path = candidate_temp
+                     elif os.path.exists(candidate_perm):
+                         template_path = candidate_perm
             
             orb_match_found = False
             

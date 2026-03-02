@@ -19,14 +19,15 @@ def upload_file():
     filename = secure_filename(file.filename)
     unique_id = str(uuid.uuid4())
     saved_filename = f"ocr_{unique_id}_{filename}"
-    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], saved_filename)
+    temp_folder = current_app.config['UPLOAD_TEMP_FOLDER']
+    filepath = os.path.join(temp_folder, saved_filename)
     file.save(filepath)
     
     # Conversion PDF -> Image si nécessaire
     if filename.lower().endswith('.pdf'):
         try:
             image_filename = f"{os.path.splitext(saved_filename)[0]}.jpg"
-            image_filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename)
+            image_filepath = os.path.join(temp_folder, image_filename)
             convert_pdf_to_image(filepath, image_filepath)
             
             # On bascule sur l'image pour la suite du traitement
@@ -43,7 +44,7 @@ def upload_file():
         'success': True, 
         'filename': filename, 
         'saved_filename': saved_filename,
-        'url': f"/uploads/{saved_filename}"
+        'url': f"/uploads_temp/{saved_filename}"
     })
 
 @file_bp.route('/api/upload-batch', methods=['POST'])
@@ -55,6 +56,7 @@ def upload_batch():
     if not files or all(f.filename == '' for f in files):
         return jsonify({'error': 'No selected files'}), 400
     
+    temp_folder = current_app.config['UPLOAD_TEMP_FOLDER']
     uploaded = []
     for file in files:
         if file.filename == '':
@@ -62,14 +64,14 @@ def upload_batch():
         filename = secure_filename(file.filename)
         unique_id = str(uuid.uuid4())
         saved_filename = f"ocr_{unique_id}_{filename}"
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], saved_filename)
+        filepath = os.path.join(temp_folder, saved_filename)
         file.save(filepath)
         
         # Conversion PDF -> Image si nécessaire
         if filename.lower().endswith('.pdf'):
             try:
                 image_filename = f"{os.path.splitext(saved_filename)[0]}.jpg"
-                image_filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename)
+                image_filepath = os.path.join(temp_folder, image_filename)
                 convert_pdf_to_image(filepath, image_filepath)
                 saved_filename = image_filename
             except Exception as e:
@@ -90,9 +92,15 @@ def upload_batch():
         'files': uploaded
     })
 
-@file_bp.route('/uploads/<filename>')
+@file_bp.route('/uploads/<path:filename>')
 def uploaded_file(filename):
+    """Serve permanent uploaded files (entity references, templates)"""
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+
+@file_bp.route('/uploads_temp/<path:filename>')
+def uploaded_temp_file(filename):
+    """Serve temporary uploaded files (OCR sessions)"""
+    return send_from_directory(current_app.config['UPLOAD_TEMP_FOLDER'], filename)
 
 @file_bp.route('/api/export-json')
 def export_json():
