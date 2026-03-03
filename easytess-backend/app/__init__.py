@@ -24,6 +24,10 @@ def create_app(config_class=Config):
     from app.services.entity_manager import EntityManager
     app.entity_manager = EntityManager(entities_folder)
     
+    # Init cleanup scheduler
+    from app.services.cleanup_service import init_cleanup_scheduler
+    init_cleanup_scheduler(app)
+    
     # Register Blueprints
     from app.api.ocr_routes import ocr_bp
     from app.api.entity_routes import entity_bp

@@ -1,21 +1,21 @@
 {
   "nom": "pp_02",
   "description": "essai image droite",
-  "date_creation": "2026-03-02T20:11:40.330212",
+  "date_creation": "2026-03-03T09:12:10.506013",
   "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\pp_02\\reference.png",
   "zones": [
     {
-      "id": 1772478694542,
-      "nom": "Zone 1",
-      "type": "text",
-      "lang": "ara+fra",
-      "preprocess": "auto",
       "coords": [
-        0.2873572239502643,
+        0.29446784922394675,
         0.15486419753086422,
-        0.4409966414050071,
+        0.4465742793791574,
         0.2054115226337449
-      ]
+      ],
+      "id": 1772478694542,
+      "lang": "ara+fra",
+      "nom": "Zone 1",
+      "preprocess": "auto",
+      "type": "text"
     }
   ],
   "cadre_reference": {
@@ -47,20 +47,15 @@
       "template_path": "templates/pp_02/droite_template.png"
     },
     "gauche": {
-      "labels": [],
-      "position_base": [
-        0.03265305981040001,
-        0.6572340130805969
+      "labels": [
+        "regex:P<DZA"
       ],
-      "template_coords": [
-        0.0108,
-        0.2122,
-        0.2558,
-        0.6181
+      "position_base": [
+        0.02346938775510204,
+        0.8007042253521127
       ],
       "offset_x": 0,
-      "offset_y": 0,
-      "template_path": "templates/pp_02/gauche_template.png"
+      "offset_y": 0
     },
     "bas": {
       "labels": [
@@ -78,7 +73,7 @@
       "height": 710
     },
     "dimensions_absolues": {
-      "largeur": 893,
+      "largeur": 902,
       "hauteur": 486,
       "angle": 0
     }

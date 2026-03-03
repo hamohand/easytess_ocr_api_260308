@@ -1,0 +1,105 @@
+{
+  "nom": "pp_3",
+  "description": "essai",
+  "date_creation": "2026-03-03T09:46:46.185751",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\pp_3\\reference.png",
+  "zones": [
+    {
+      "coords": [
+        0.2704329461457233,
+        0.06639610389610391,
+        0.5343189017951426,
+        0.12978896103896106
+      ],
+      "id": 1772525736030,
+      "lang": "ara",
+      "nom": "nom",
+      "preprocess": "arabic_textured",
+      "type": "text"
+    },
+    {
+      "coords": [
+        0.683026399155227,
+        -0.008522727272727262,
+        0.807208025343189,
+        0.04334415584415587
+      ],
+      "id": 1772525772530,
+      "lang": "fra",
+      "nom": "numero",
+      "preprocess": "latin_simple",
+      "type": "text"
+    },
+    {
+      "coords": [
+        0.5924772967265047,
+        0.6196428571428573,
+        0.7114846884899683,
+        0.6815373376623377
+      ],
+      "id": 1772525820079,
+      "lang": "fra",
+      "nom": "ville",
+      "preprocess": "latin_simple",
+      "type": "text"
+    }
+  ],
+  "cadre_reference": {
+    "haut": {
+      "labels": [
+        "regex:DZA"
+      ],
+      "position_base": [
+        0.503061224489796,
+        0.1323943661971831
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "droite": {
+      "labels": [],
+      "position_base": [
+        1,
+        0.5
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "gauche": {
+      "labels": [
+        "regex:\\d{18}"
+      ],
+      "position_base": [
+        0.0336734693877551,
+        0.7077464788732394
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "bas": {
+      "labels": [],
+      "position_base": [
+        0.5,
+        1
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "image_base_dimensions": {
+      "width": 980,
+      "height": 710
+    },
+    "dimensions_absolues": {
+      "largeur": 0,
+      "hauteur": 0,
+      "angle": 0
+    }
+  },
+  "metadata": {
+    "nombre_zones": 3,
+    "image_dimensions": {
+      "width": 980,
+      "height": 710
+    }
+  }
+}

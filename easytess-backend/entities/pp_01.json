@@ -1,7 +1,7 @@
 {
   "nom": "pp_01",
   "description": "Passeport DZ",
-  "date_creation": "2026-03-02T20:13:04.383230",
+  "date_creation": "2026-03-03T09:06:39.512681",
   "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\pp_01\\reference.png",
   "zones": [
     {
@@ -9,7 +9,7 @@
         0.27293625914315567,
         0.10977822580645162,
         0.5378537095088819,
-        0.18135080645161286
+        0.18135080645161294
       ],
       "id": 1772157920862,
       "lang": "ara",

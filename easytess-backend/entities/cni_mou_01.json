@@ -1,0 +1,105 @@
+{
+  "nom": "cni_mou_01",
+  "description": "",
+  "date_creation": "2026-03-03T10:12:07.224738",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_mou_01\\reference.jpg",
+  "zones": [
+    {
+      "coords": [
+        -0.015591647331786527,
+        -0.019873870967741947,
+        0.24880742459396754,
+        0.0444847465437788
+      ],
+      "id": 1772528879707,
+      "lang": "ara+fra",
+      "nom": "num",
+      "preprocess": "auto",
+      "type": "text"
+    },
+    {
+      "coords": [
+        0.5401067285382831,
+        0.2831614285714285,
+        0.8673689095127611,
+        0.3261749769585254
+      ],
+      "id": 1772528888560,
+      "lang": "ara",
+      "nom": "nom",
+      "preprocess": "arabic_textured",
+      "type": "text"
+    },
+    {
+      "coords": [
+        0.5293178654292343,
+        0.43193009216589867,
+        0.7755916473317865,
+        0.4791479723502303
+      ],
+      "id": 1772528898628,
+      "lang": "ara+fra",
+      "nom": "date",
+      "preprocess": "auto",
+      "type": "text"
+    }
+  ],
+  "cadre_reference": {
+    "haut": {
+      "labels": [
+        "regex:\\d{9}"
+      ],
+      "position_base": [
+        0.38548387096774195,
+        0.3815901966372186
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "droite": {
+      "labels": [],
+      "position_base": [
+        1,
+        0.5
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "gauche": {
+      "labels": [
+        "regex:\\d{9}"
+      ],
+      "position_base": [
+        0.30483870967741933,
+        0.390282131661442
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "bas": {
+      "labels": [],
+      "position_base": [
+        0.5,
+        1
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "image_base_dimensions": {
+      "width": 2480,
+      "height": 3509
+    },
+    "dimensions_absolues": {
+      "largeur": 1724,
+      "hauteur": 2170,
+      "angle": 0
+    }
+  },
+  "metadata": {
+    "nombre_zones": 3,
+    "image_dimensions": {
+      "width": 2480,
+      "height": 3509
+    }
+  }
+}

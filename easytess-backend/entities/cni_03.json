@@ -1,34 +1,47 @@
 {
-  "nom": "cni_temp_01",
-  "description": "temp",
-  "date_creation": "2026-03-03T02:56:28.566268",
-  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_temp_01\\reference.jpeg",
+  "nom": "cni_03",
+  "description": "carte",
+  "date_creation": "2026-03-03T10:02:32.028789",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_03\\reference.jpeg",
   "zones": [
     {
-      "id": 1772502908897,
-      "nom": "numero",
-      "type": "text",
-      "lang": "fra",
-      "preprocess": "latin_simple",
       "coords": [
-        -0.0036714611872145733,
-        -0.008400297619047628,
-        0.25199223744292243,
-        0.07794196428571425
-      ]
+        -0.004554285714285727,
+        -0.005565178571428571,
+        0.26137428571428567,
+        0.09263303571428572
+      ],
+      "id": 1772527907399,
+      "lang": "fra",
+      "nom": "numPiece",
+      "preprocess": "latin_simple",
+      "type": "text"
     },
     {
-      "id": 1772502959063,
-      "nom": "nom",
-      "type": "text",
-      "lang": "ara",
-      "preprocess": "arabic_textured",
       "coords": [
-        0.6104360730593608,
-        0.5012767857142857,
-        0.9140840182648402,
-        0.5905830357142858
-      ]
+        0.5558628571428572,
+        0.4917404761904763,
+        0.8834285714285715,
+        0.5840107142857144
+      ],
+      "id": 1772527923535,
+      "lang": "ara",
+      "nom": "nom",
+      "preprocess": "arabic_textured",
+      "type": "text"
+    },
+    {
+      "coords": [
+        0.5294885714285715,
+        0.7626232142857143,
+        0.7959999999999999,
+        0.845357142857143
+      ],
+      "id": 1772527942656,
+      "lang": "fra",
+      "nom": "dateNaissance",
+      "preprocess": "latin_simple",
+      "type": "text"
     }
   ],
   "cadre_reference": {
@@ -46,18 +59,11 @@
     "droite": {
       "labels": [],
       "position_base": [
-        0.9743589743589743,
-        0.06697459584295612
-      ],
-      "template_coords": [
-        0.9222,
-        0.0447,
-        0.9749,
-        0.0909
+        1,
+        0.5
       ],
       "offset_x": 0,
-      "offset_y": 0,
-      "template_path": "templates/cni_temp_01/droite_template.png"
+      "offset_y": 0
     },
     "gauche": {
       "labels": [
@@ -84,13 +90,13 @@
       "height": 433
     },
     "dimensions_absolues": {
-      "largeur": 438,
+      "largeur": 455,
       "hauteur": 336,
       "angle": 0
     }
   },
   "metadata": {
-    "nombre_zones": 2,
+    "nombre_zones": 3,
     "image_dimensions": {
       "width": 663,
       "height": 433

@@ -10,3 +10,4 @@ pypdfium2
 pdfplumber
 pyzbar
 python-docx
+APScheduler
