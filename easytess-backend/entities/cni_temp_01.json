@@ -1,0 +1,99 @@
+{
+  "nom": "cni_temp_01",
+  "description": "temp",
+  "date_creation": "2026-03-03T02:56:28.566268",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_temp_01\\reference.jpeg",
+  "zones": [
+    {
+      "id": 1772502908897,
+      "nom": "numero",
+      "type": "text",
+      "lang": "fra",
+      "preprocess": "latin_simple",
+      "coords": [
+        -0.0036714611872145733,
+        -0.008400297619047628,
+        0.25199223744292243,
+        0.07794196428571425
+      ]
+    },
+    {
+      "id": 1772502959063,
+      "nom": "nom",
+      "type": "text",
+      "lang": "ara",
+      "preprocess": "arabic_textured",
+      "coords": [
+        0.6104360730593608,
+        0.5012767857142857,
+        0.9140840182648402,
+        0.5905830357142858
+      ]
+    }
+  ],
+  "cadre_reference": {
+    "haut": {
+      "labels": [
+        "regex:\\d{9}"
+      ],
+      "position_base": [
+        0.39441930618401205,
+        0.22401847575057737
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "droite": {
+      "labels": [],
+      "position_base": [
+        0.9743589743589743,
+        0.06697459584295612
+      ],
+      "template_coords": [
+        0.9222,
+        0.0447,
+        0.9749,
+        0.0909
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "template_path": "templates/cni_temp_01/droite_template.png"
+    },
+    "gauche": {
+      "labels": [
+        "regex:\\d{9}"
+      ],
+      "position_base": [
+        0.3137254901960784,
+        0.24364896073903003
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "bas": {
+      "labels": [],
+      "position_base": [
+        0.5,
+        1
+      ],
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    "image_base_dimensions": {
+      "width": 663,
+      "height": 433
+    },
+    "dimensions_absolues": {
+      "largeur": 438,
+      "hauteur": 336,
+      "angle": 0
+    }
+  },
+  "metadata": {
+    "nombre_zones": 2,
+    "image_dimensions": {
+      "width": 663,
+      "height": 433
+    }
+  }
+}

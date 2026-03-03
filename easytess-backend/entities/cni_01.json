@@ -2,7 +2,7 @@
   "nom": "cni_01",
   "description": "CNI DZ",
   "date_creation": "2026-03-02T04:38:13.843962",
-  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\temp_entite_61587faa-fe59-4b0f-ac40-b3ff59f03ae9_cni_dz_recto.jpeg",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_01\\reference.jpeg",
   "zones": [
     {
       "coords": [

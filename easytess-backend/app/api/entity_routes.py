@@ -138,8 +138,15 @@ def detecter_etiquettes():
         return jsonify({'error': 'Filename manquant'}), 400
     
     # Construire le chemin de l'image
-    image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    # Chercher d'abord dans uploads_temp/ (fichiers temporaires uploadés récemment)
+    temp_folder = current_app.config['UPLOAD_TEMP_FOLDER']
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    image_path = os.path.join(temp_folder, filename)
     if not os.path.exists(image_path):
+        # Fallback : chercher dans le dossier uploads/ permanent
+        image_path = os.path.join(upload_folder, filename)
+    if not os.path.exists(image_path):
+        current_app.logger.error(f"Image non trouvée ni dans uploads_temp/ ni dans uploads/: {filename}")
         return jsonify({'error': f'Image non trouvée: {filename}'}), 404
     
     current_app.logger.info(f"📥 /detecter-etiquettes reçu: filename={filename}, etiquettes_keys={list(etiquettes.keys())}")
@@ -303,9 +310,18 @@ def sauvegarder_entite():
     zones = data.get('zones') or session.get('temp_zones', [])
     
     # Angular: Send 'image_filename' or 'image_path' if available
+    # Chercher d'abord dans uploads_temp/ (fichiers temporaires uploadés récemment)
     image_path = None
     if data.get('image_filename'):
-         image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], data.get('image_filename'))
+        image_filename = data.get('image_filename')
+        temp_path = os.path.join(current_app.config['UPLOAD_TEMP_FOLDER'], image_filename)
+        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename)
+        if os.path.exists(temp_path):
+            image_path = temp_path
+        elif os.path.exists(upload_path):
+            image_path = upload_path
+        else:
+            current_app.logger.warning(f"⚠️ Image '{image_filename}' non trouvée ni dans uploads_temp/ ni dans uploads/")
     else:
          image_path = session.get('temp_image_path')
     
@@ -396,9 +412,20 @@ def supprimer_entite(nom):
         if os.path.exists(entite_path):
             os.remove(entite_path)
         
-        # Optionnel : supprimer l'image de référence si elle existe
+        # Supprimer le dossier d'images de l'entité (uploads/entities/{nom}/)
+        import shutil
+        entity_images_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'entities', nom)
+        if os.path.isdir(entity_images_dir):
+            shutil.rmtree(entity_images_dir, ignore_errors=True)
+        
+        # Supprimer le dossier templates de l'entité (uploads/templates/{nom}/)
+        templates_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'templates', nom)
+        if os.path.isdir(templates_dir):
+            shutil.rmtree(templates_dir, ignore_errors=True)
+        
+        # Supprimer l'image de référence si elle existe (chemin absolu stocké dans le JSON)
         if entite.get('image_reference'):
-            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], entite['image_reference'])
+            image_path = entite['image_reference']
             if os.path.exists(image_path):
                 os.remove(image_path)
         
