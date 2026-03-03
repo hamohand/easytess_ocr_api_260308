@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Entite, Zone, ImageEntiteUploadResponse, CadreReference } from './models';
+import { Entite, Zone, ImageEntiteUploadResponse, CadreReference, EntiteComposite, AppariementConfig } from './models';
 
 @Injectable({
     providedIn: 'root'
@@ -133,6 +133,44 @@ export class EntityService {
         return this.http.post<any>(`${this.apiUrl}/detecter-etiquettes`, {
             filename,
             etiquettes
+        });
+    }
+
+    // ─── Composite entity methods ───────────────────────────
+
+    /**
+     * Upload une image pour une page d'entité composite
+     */
+    uploadImageEntitePage(file: File, pageId: string): Observable<ImageEntiteUploadResponse> {
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('page_id', pageId);
+        return this.http.post<ImageEntiteUploadResponse>(`${this.apiUrl}/upload-image-entite-page`, formData);
+    }
+
+    /**
+     * Sauvegarde une entité composite (mode manuel)
+     */
+    sauvegarderEntiteComposite(body: any): Observable<{ success: boolean }> {
+        return this.http.post<{ success: boolean }>(`${this.apiUrl}/sauvegarder-entite-composite`, body);
+    }
+
+    /**
+     * Compose une entité composite à partir de deux entités simples
+     */
+    composerEntiteComposite(
+        nom: string,
+        entiteRecto: string,
+        entiteVerso: string,
+        description: string,
+        appariement: AppariementConfig
+    ): Observable<{ success: boolean; message: string }> {
+        return this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/composer-entite-composite`, {
+            nom,
+            description,
+            entite_recto: entiteRecto,
+            entite_verso: entiteVerso,
+            appariement
         });
     }
 }

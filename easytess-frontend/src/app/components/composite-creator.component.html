@@ -1,0 +1,123 @@
+<!-- composite-creator.component.html -->
+<div class="composite-container">
+    <h2 class="page-title">🔗 Entités Composites</h2>
+    <p class="page-desc">Créez une entité composite en assemblant deux entités simples (recto + verso).</p>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+        <button class="mode-tab" [class.active]="mode() === 'compose'" (click)="setMode('compose')">
+            🔗 Composer depuis existantes
+        </button>
+        <button class="mode-tab" [class.active]="mode() === 'manual'" (click)="setMode('manual')">
+            ✏️ Créer manuellement
+        </button>
+    </div>
+
+    <!-- Compose mode -->
+    @if (mode() === 'compose') {
+    <div class="create-section">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nom de l'entité composite</label>
+                <input type="text" [(ngModel)]="entityName" placeholder="ex: cni_dz_composite">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" [(ngModel)]="entityDesc" placeholder="ex: CNI Algérie recto-verso">
+            </div>
+            <div class="form-group">
+                <label>Méthode d'appariement</label>
+                <select [(ngModel)]="matchMethod">
+                    <option value="numero_piece">Numéro de pièce</option>
+                    <option value="photo">Photo d'identité</option>
+                    <option value="combinee">Combinée</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Champ commun</label>
+                <input type="text" [(ngModel)]="matchField" placeholder="ex: numeroPiece">
+            </div>
+        </div>
+
+        <div class="entity-selectors">
+            <div class="selector-card">
+                <h3>🪪 Entité Recto</h3>
+                <select [(ngModel)]="selectedRecto" (ngModelChange)="onRectoSelected()">
+                    <option value="">— Sélectionner une entité simple —</option>
+                    @for (ent of simpleEntities(); track ent.nom) {
+                    <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }} ({{ ent.zones?.length || 0 }}
+                        zones)</option>
+                    }
+                </select>
+                @if (rectoInfo()) {
+                <div class="entity-info">✅ {{ rectoInfo() }}</div>
+                }
+            </div>
+            <div class="selector-arrow">➜</div>
+            <div class="selector-card">
+                <h3>🪪 Entité Verso</h3>
+                <select [(ngModel)]="selectedVerso" (ngModelChange)="onVersoSelected()">
+                    <option value="">— Sélectionner une entité simple —</option>
+                    @for (ent of simpleEntities(); track ent.nom) {
+                    <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }} ({{ ent.zones?.length || 0 }}
+                        zones)</option>
+                    }
+                </select>
+                @if (versoInfo()) {
+                <div class="entity-info">✅ {{ versoInfo() }}</div>
+                }
+            </div>
+        </div>
+
+        <button class="btn-save" [disabled]="!canSave() || loading()" (click)="save()">
+            @if (loading()) {
+            <span class="spinner"></span> Sauvegarde...
+            } @else {
+            💾 Créer l'entité composite
+            }
+        </button>
+    </div>
+    }
+
+    <!-- Manual mode placeholder -->
+    @if (mode() === 'manual') {
+    <div class="manual-hint">
+        <p>💡 Le mode manuel est disponible sur la page <a href="/creer-composite" target="_blank">Créer
+                manuellement</a> (interface standalone avec canvas de dessin).</p>
+    </div>
+    }
+
+    <!-- Status -->
+    @if (status()) {
+    <div class="status-bar" [class]="'status-' + statusType()">
+        {{ status() }}
+    </div>
+    }
+
+    <!-- Existing composite entities -->
+    @if (compositeEntities().length > 0) {
+    <div class="existing-section">
+        <h3>📋 Entités composites existantes</h3>
+        <div class="entity-list">
+            @for (ent of compositeEntities(); track ent.nom) {
+            <div class="entity-card">
+                <div class="entity-card-header">
+                    <strong>{{ ent.nom }}</strong>
+                    <span class="badge">composite</span>
+                </div>
+                <div class="entity-card-desc">{{ $any(ent).description || '—' }}</div>
+                <div class="entity-card-pages">
+                    @if ($any(ent).pages?.recto?.entite_source) {
+                    <span class="page-badge">Recto: {{ $any(ent).pages.recto.entite_source }}</span>
+                    }
+                    @if ($any(ent).pages?.verso?.entite_source) {
+                    <span class="page-badge">Verso: {{ $any(ent).pages.verso.entite_source }}</span>
+                    }
+                </div>
+                <button class="btn-delete" (click)="deleteComposite(ent.nom)">🗑️ Supprimer</button>
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>

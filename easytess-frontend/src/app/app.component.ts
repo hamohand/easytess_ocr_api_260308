@@ -4,14 +4,16 @@ import { CommonModule } from '@angular/common';
 import { OcrUploadComponent } from './components/ocr-upload.component';
 import { EntityCreatorComponent } from './components/entity-creator.component';
 import { DocumentExtractorComponent } from './components/document-extractor.component';
+import { CompositeCreatorComponent } from './components/composite-creator.component';
+import { MatchingComponent } from './components/matching.component';
 
 type Section = 'ocr' | 'extraction';
-type OcrTab = 'analyse' | 'entity';
+type OcrTab = 'analyse' | 'entity' | 'composite' | 'appariement';
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [CommonModule, OcrUploadComponent, EntityCreatorComponent, DocumentExtractorComponent],
+    imports: [CommonModule, OcrUploadComponent, EntityCreatorComponent, DocumentExtractorComponent, CompositeCreatorComponent, MatchingComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 })
@@ -28,3 +30,4 @@ export class AppComponent {
         this.activeOcrTab.set(tab);
     }
 }
+

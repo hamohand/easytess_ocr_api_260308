@@ -1,0 +1,141 @@
+<!-- matching.component.html -->
+<div class="matching-container">
+    <h2 class="page-title">🪪 Appariement Recto / Verso</h2>
+    <p class="page-desc">Vérifiez si deux images appartiennent à la même pièce d'identité.</p>
+
+    <!-- Entity selection -->
+    <div class="entity-select">
+        <label>Entité composite</label>
+        <select [(ngModel)]="selectedEntity">
+            <option value="">— Sélectionner une entité composite —</option>
+            @for (ent of compositeEntities(); track ent.nom) {
+            <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }}</option>
+            }
+        </select>
+    </div>
+
+    <!-- Upload zones -->
+    <div class="upload-row">
+        <div class="upload-zone" (click)="rectoInput.click()">
+            @if (rectoPreview()) {
+            <img [src]="rectoPreview()" alt="Recto" class="preview-img">
+            } @else {
+            <div class="upload-placeholder">
+                <span class="upload-icon">📷</span>
+                <span>Recto</span>
+            </div>
+            }
+            <input #rectoInput type="file" accept="image/*" (change)="onRectoSelected($event)" hidden>
+        </div>
+
+        <div class="upload-zone" (click)="versoInput.click()">
+            @if (versoPreview()) {
+            <img [src]="versoPreview()" alt="Verso" class="preview-img">
+            } @else {
+            <div class="upload-placeholder">
+                <span class="upload-icon">📷</span>
+                <span>Verso</span>
+            </div>
+            }
+            <input #versoInput type="file" accept="image/*" (change)="onVersoSelected($event)" hidden>
+        </div>
+    </div>
+
+    <!-- Analyse button -->
+    <button class="btn-analyse" [disabled]="!canAnalyse() || loading()" (click)="analyse()">
+        @if (loading()) {
+        <span class="spinner"></span> Analyse en cours...
+        } @else {
+        🔍 Lancer l'appariement
+        }
+    </button>
+
+    <!-- Results -->
+    @if (result()) {
+    <div class="results-section">
+        <!-- Match status -->
+        <div class="match-badge" [class]="getMatchClass()">
+            {{ getMatchLabel() }} — {{ getConfidencePercent() }}%
+        </div>
+
+        <!-- Confidence bar -->
+        <div class="confidence-bar">
+            <div class="confidence-fill" [style.width.%]="getConfidencePercent()" [class]="getMatchClass()"></div>
+        </div>
+        <div class="confidence-labels">
+            <span>0%</span>
+            <span>Confiance : {{ getConfidencePercent() }}%</span>
+            <span>100%</span>
+        </div>
+
+        <!-- Details -->
+        @if (result()!.appariement.details.numero) {
+        <div class="detail-card">
+            <div class="detail-header">
+                <span>📝 Numéro de pièce</span>
+                <span [class]="result()!.appariement.details.numero!.match ? 'tag-match' : 'tag-no-match'">
+                    Score : {{ (result()!.appariement.details.numero!.score * 100) | number:'1.0-0' }}%
+                </span>
+            </div>
+            <div class="detail-values">
+                Recto: <strong>{{ result()!.appariement.details.numero!.recto || '—' }}</strong>
+                — Verso: <strong>{{ result()!.appariement.details.numero!.verso || '—' }}</strong>
+            </div>
+        </div>
+        }
+
+        @if (result()!.appariement.details.photo) {
+        <div class="detail-card">
+            <div class="detail-header">
+                <span>📸 Photo d'identité</span>
+                <span [class]="result()!.appariement.details.photo!.match ? 'tag-match' : 'tag-no-match'">
+                    SSIM : {{ (result()!.appariement.details.photo!.score_ssim * 100) | number:'1.0-0' }}%
+                </span>
+            </div>
+        </div>
+        }
+
+        <!-- OCR tables -->
+        <div class="ocr-tables">
+            <div class="ocr-table-card">
+                <h4>📄 Résultats Recto</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Champ</th>
+                            <th>Valeur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (entry of getResultEntries(result()!.resultats_recto); track entry.key) {
+                        <tr>
+                            <td>{{ entry.key }}</td>
+                            <td>{{ entry.value }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="ocr-table-card">
+                <h4>📄 Résultats Verso</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Champ</th>
+                            <th>Valeur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (entry of getResultEntries(result()!.resultats_verso); track entry.key) {
+                        <tr>
+                            <td>{{ entry.key }}</td>
+                            <td>{{ entry.value }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    }
+</div>

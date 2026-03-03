@@ -33,13 +33,26 @@
             <span class="sub-tab-icon">⚙️</span>
             Gestion des Entités
         </button>
+        <button class="sub-tab-btn" [class.active]="activeOcrTab() === 'composite'" (click)="setOcrTab('composite')">
+            <span class="sub-tab-icon">🔗</span>
+            Entités Composites
+        </button>
+        <button class="sub-tab-btn" [class.active]="activeOcrTab() === 'appariement'"
+            (click)="setOcrTab('appariement')">
+            <span class="sub-tab-icon">🪪</span>
+            Appariement
+        </button>
     </nav>
 
     <main class="content">
         @if (activeOcrTab() === 'analyse') {
         <app-ocr-upload />
-        } @else {
+        } @else if (activeOcrTab() === 'entity') {
         <app-entity-creator />
+        } @else if (activeOcrTab() === 'composite') {
+        <app-composite-creator />
+        } @else if (activeOcrTab() === 'appariement') {
+        <app-matching />
         }
     </main>
     }

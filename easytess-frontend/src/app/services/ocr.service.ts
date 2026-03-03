@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AnalyseResponse, ResultatOCR, CadreReference, BatchAnalyseResponse } from './models';
+import { AnalyseResponse, ResultatOCR, CadreReference, BatchAnalyseResponse, AppariementResponse } from './models';
 
 @Injectable({
     providedIn: 'root'
@@ -73,5 +73,18 @@ export class OcrService {
      */
     getBatchResult(jobId: string): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/batch-result/${jobId}`);
+    }
+
+    // ─── Matching ───────────────────────────
+
+    /**
+     * Appariement recto/verso de deux images
+     */
+    apparierRectoVerso(entite: string, rectoFilename: string, versoFilename: string): Observable<AppariementResponse> {
+        const formData = new FormData();
+        formData.append('entite', entite);
+        formData.append('recto_filename', rectoFilename);
+        formData.append('verso_filename', versoFilename);
+        return this.http.post<AppariementResponse>(`${this.apiUrl}/apparier-recto-verso`, formData);
     }
 }
