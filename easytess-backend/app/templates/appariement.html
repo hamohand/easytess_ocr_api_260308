@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTess — Appariement Recto/Verso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-secondary: #1a1d2e;
+            --bg-card: #1e2235;
+            --bg-card-hover: #252a40;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --success: #00cec9;
+            --success-glow: rgba(0, 206, 201, 0.2);
+            --warning: #fdcb6e;
+            --danger: #ff6b6b;
+            --danger-glow: rgba(255, 107, 107, 0.2);
+            --text-primary: #e8e8f0;
+            --text-secondary: #8b8da3;
+            --text-muted: #5a5c72;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-accent: rgba(108, 92, 231, 0.3);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* === HEADER === */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border-bottom: 1px solid var(--border);
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+        .header .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-light), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+
+        /* === LAYOUT === */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .full-width { grid-column: 1 / -1; }
+
+        /* === CARDS === */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .card:hover { border-color: var(--border-accent); }
+        .card-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-title .icon {
+            font-size: 1rem;
+        }
+
+        /* === UPLOAD ZONE === */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--accent);
+            background: rgba(108, 92, 231, 0.05);
+        }
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .upload-zone .upload-text { color: var(--text-secondary); font-size: 0.85rem; }
+        .upload-zone .upload-text strong { color: var(--accent-light); }
+
+        /* === IMAGE PREVIEW === */
+        .image-preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            display: none;
+        }
+        .image-preview.visible { display: block; margin-top: 1rem; }
+        .filename-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--accent-light);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.75rem;
+        }
+
+        /* === SELECT === */
+        .select-wrapper {
+            position: relative;
+        }
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        select:hover, select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* === BUTTON === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #7c6cf0);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--accent-glow);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            transform: none;
+            cursor: not-allowed;
+        }
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: var(--radius);
+        }
+
+        /* === RESULTS === */
+        .result-panel {
+            display: none;
+        }
+        .result-panel.visible { display: block; }
+
+        .match-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+        .match-badge.success {
+            background: var(--success-glow);
+            color: var(--success);
+            border: 1px solid rgba(0, 206, 201, 0.3);
+        }
+        .match-badge.danger {
+            background: var(--danger-glow);
+            color: var(--danger);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        .match-badge.neutral {
+            background: rgba(253, 203, 110, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(253, 203, 110, 0.3);
+        }
+
+        .confidence-bar {
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+            background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+        }
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        /* === OCR RESULTS TABLE === */
+        .result-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+        }
+        .result-table th {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .result-table td {
+            padding: 0.7rem 1rem;
+            font-size: 0.88rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .result-table tr:hover td {
+            background: rgba(108, 92, 231, 0.04);
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 500;
+        }
+        .tag-recto {
+            background: rgba(108, 92, 231, 0.2);
+            color: var(--accent-light);
+        }
+        .tag-verso {
+            background: rgba(0, 206, 201, 0.2);
+            color: var(--success);
+        }
+
+        /* === MATCH DETAILS === */
+        .detail-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+        }
+        .detail-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .detail-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* === SPINNER === */
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner.active { display: inline-block; }
+
+        /* === STATUS === */
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">EasyTess</div>
+    <div class="subtitle">Appariement Recto / Verso</div>
+</div>
+
+<div class="container">
+
+    <!-- Sélection entité -->
+    <div class="card full-width" style="margin-bottom: 1.5rem;">
+        <div class="card-title"><span class="icon">📋</span> Entité composite</div>
+        <select id="entitySelect">
+            <option value="">— Chargement des entités... —</option>
+        </select>
+        <div id="entityInfo" class="status-line" style="display:none;"></div>
+    </div>
+
+    <!-- Upload recto & verso -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title"><span class="icon">🪪</span> Recto</div>
+            <div class="upload-zone" id="zoneRecto">
+                <input type="file" accept="image/*,.pdf" id="inputRecto">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Glissez-déposez ou <strong>cliquez</strong></div>
+            </div>
+            <img id="previewRecto" class="image-preview" alt="Recto">
+            <div id="badgeRecto"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🪪</span> Verso</div>
+            <div class="upload-zone" id="zoneVerso">
+                <input type="file" accept="image/*,.pdf" id="inputVerso">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Glissez-déposez ou <strong>cliquez</strong></div>
+            </div>
+            <img id="previewVerso" class="image-preview" alt="Verso">
+            <div id="badgeVerso"></div>
+        </div>
+    </div>
+
+    <!-- Bouton analyser -->
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <button class="btn btn-primary btn-lg" id="btnAnalyser" disabled>
+            <span class="spinner" id="spinner"></span>
+            <span id="btnText">🔍 Analyser et Apparier</span>
+        </button>
+        <div id="statusLine" class="status-line" style="justify-content: center; display: none;"></div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="result-panel" id="resultPanel" style="margin-top: 2rem;">
+
+        <!-- Appariement -->
+        <div class="card full-width" style="margin-bottom: 1.5rem;">
+            <div class="card-title"><span class="icon">🔗</span> Appariement</div>
+            <div style="text-align: center; padding: 1rem 0;">
+                <div id="matchBadge"></div>
+                <div class="confidence-bar" style="margin-top: 1.2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <div class="confidence-fill" id="confidenceFill" style="width: 0%;"></div>
+                </div>
+                <div class="confidence-label" style="max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <span>0%</span>
+                    <span id="confidenceLabel">Confiance : —</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            <div id="matchDetails"></div>
+        </div>
+
+        <!-- Résultats OCR -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> Résultats Recto</div>
+                <table class="result-table" id="tableRecto">
+                    <thead><tr><th>Champ</th><th>Valeur</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="icon">📝</span> Résultats Verso</div>
+                <table class="result-table" id="tableVerso">
+                    <thead><tr><th>Champ</th><th>Valeur</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Résultats fusionnés -->
+        <div class="card full-width" style="margin-top: 1.5rem;">
+            <div class="card-title"><span class="icon">📦</span> Résultats fusionnés</div>
+            <table class="result-table" id="tableFusion">
+                <thead><tr><th>Champ</th><th>Valeur</th><th>Source</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let rectoFilename = null;
+let versoFilename = null;
+
+// ── Load entities ──
+async function loadEntities() {
+    try {
+        const res = await fetch(`${API}/api/entites`);
+        const entites = await res.json();
+        const select = document.getElementById('entitySelect');
+        select.innerHTML = '<option value="">— Sélectionner une entité composite —</option>';
+
+        const composites = entites.filter(e => e.type === 'composite' || e.pages);
+        if (composites.length === 0) {
+            select.innerHTML += '<option disabled>Aucune entité composite trouvée</option>';
+            return;
+        }
+        composites.forEach(e => {
+            const pages = e.pages ? Object.keys(e.pages).join(', ') : '';
+            select.innerHTML += `<option value="${e.nom}">${e.nom} — ${e.description || ''} (${pages})</option>`;
+        });
+    } catch (err) {
+        console.error('Erreur chargement entités:', err);
+    }
+}
+
+document.getElementById('entitySelect').addEventListener('change', (e) => {
+    const info = document.getElementById('entityInfo');
+    if (e.target.value) {
+        info.style.display = 'flex';
+        info.innerHTML = `✅ Entité <strong style="margin: 0 0.3rem; color: var(--accent-light);">${e.target.value}</strong> sélectionnée`;
+    } else {
+        info.style.display = 'none';
+    }
+    updateButton();
+});
+
+// ── Upload image ──
+async function uploadImage(file, pageId) {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('page_id', pageId);
+
+    const res = await fetch(`${API}/api/upload-image-entite-page`, { method: 'POST', body: formData });
+    const data = await res.json();
+    return data;
+}
+
+function setupUpload(inputId, zoneId, previewId, badgeId, side) {
+    const input = document.getElementById(inputId);
+    const zone = document.getElementById(zoneId);
+    const preview = document.getElementById(previewId);
+    const badge = document.getElementById(badgeId);
+
+    // Drag & drop
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+            input.files = e.dataTransfer.files;
+            handleFile(e.dataTransfer.files[0], side, preview, badge);
+        }
+    });
+
+    input.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0], side, preview, badge);
+    });
+}
+
+async function handleFile(file, side, preview, badge) {
+    // Local preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.classList.add('visible');
+    };
+    if (file.type.startsWith('image/')) reader.readAsDataURL(file);
+
+    badge.innerHTML = '<div class="filename-badge">⏳ Upload en cours...</div>';
+
+    try {
+        const data = await uploadImage(file, side);
+        if (data.success) {
+            if (side === 'recto') rectoFilename = data.filename;
+            else versoFilename = data.filename;
+
+            badge.innerHTML = `<div class="filename-badge">✅ ${data.filename}</div>`;
+            if (data.image_url && file.type.startsWith('image/')) {
+                preview.src = data.image_url;
+            }
+        } else {
+            badge.innerHTML = `<div class="filename-badge" style="color: var(--danger);">❌ ${data.error}</div>`;
+        }
+    } catch (err) {
+        badge.innerHTML = `<div class="filename-badge" style="color: var(--danger);">❌ Erreur: ${err.message}</div>`;
+    }
+    updateButton();
+}
+
+function updateButton() {
+    const entity = document.getElementById('entitySelect').value;
+    document.getElementById('btnAnalyser').disabled = !(entity && rectoFilename && versoFilename);
+}
+
+// ── Analyser ──
+document.getElementById('btnAnalyser').addEventListener('click', async () => {
+    const entity = document.getElementById('entitySelect').value;
+    if (!entity || !rectoFilename || !versoFilename) return;
+
+    const btn = document.getElementById('btnAnalyser');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const status = document.getElementById('statusLine');
+
+    btn.disabled = true;
+    spinner.classList.add('active');
+    btnText.textContent = 'Analyse en cours...';
+    status.style.display = 'flex';
+    status.textContent = '🔄 OCR recto + verso, puis appariement...';
+
+    try {
+        const res = await fetch(`${API}/api/apparier-recto-verso`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                entite: entity,
+                image_recto: rectoFilename,
+                image_verso: versoFilename
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            displayResults(data);
+            status.innerHTML = '✅ Analyse terminée';
+        } else {
+            status.innerHTML = `❌ Erreur : ${data.error}`;
+        }
+    } catch (err) {
+        status.innerHTML = `❌ Erreur réseau : ${err.message}`;
+    }
+
+    spinner.classList.remove('active');
+    btnText.textContent = '🔍 Analyser et Apparier';
+    btn.disabled = false;
+});
+
+// ── Display results ──
+function displayResults(data) {
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('visible');
+
+    // Appariement badge
+    const app = data.appariement || {};
+    const badge = document.getElementById('matchBadge');
+    const conf = Math.round((app.confiance || 0) * 100);
+
+    if (app.apparie === true) {
+        badge.innerHTML = `<span class="match-badge success">✅ MÊME PIÈCE — ${conf}%</span>`;
+    } else if (app.apparie === false) {
+        badge.innerHTML = `<span class="match-badge danger">❌ PIÈCES DIFFÉRENTES — ${conf}%</span>`;
+    } else {
+        badge.innerHTML = `<span class="match-badge neutral">⚠️ INDÉTERMINÉ</span>`;
+    }
+
+    // Confidence bar
+    document.getElementById('confidenceFill').style.width = `${conf}%`;
+    document.getElementById('confidenceLabel').textContent = `Confiance : ${conf}%`;
+
+    // Match details
+    const details = document.getElementById('matchDetails');
+    details.innerHTML = '';
+    if (app.details) {
+        if (app.details.numero) {
+            const n = app.details.numero;
+            details.innerHTML += `
+                <div class="detail-row">
+                    <div class="detail-label">🔢 Numéro de pièce</div>
+                    <div class="detail-value">
+                        ${n.match ? '✅' : '❌'} Score : ${Math.round(n.score * 100)}%
+                        <span style="color: var(--text-muted); font-weight: 400; font-size: 0.8rem; margin-left: 0.5rem;">
+                            Recto: "${n.recto}" — Verso: "${n.verso}"
+                        </span>
+                    </div>
+                </div>`;
+        }
+        if (app.details.photo) {
+            const p = app.details.photo;
+            details.innerHTML += `
+                <div class="detail-row">
+                    <div class="detail-label">📸 Photo d'identité</div>
+                    <div class="detail-value">
+                        ${p.match ? '✅' : '❌'}
+                        SSIM: ${Math.round((p.score_ssim || 0) * 100)}%
+                        ${p.score_orb != null ? ` — ORB: ${Math.round(p.score_orb * 100)}%` : ''}
+                        (méthode: ${p.methode_decisive || '—'})
+                    </div>
+                </div>`;
+        }
+        if (app.erreur) {
+            details.innerHTML += `
+                <div class="detail-row" style="border-left: 3px solid var(--warning);">
+                    <div class="detail-label">⚠️ Note</div>
+                    <div class="detail-value" style="color: var(--warning);">${app.erreur}</div>
+                </div>`;
+        }
+    }
+
+    // OCR tables
+    fillTable('tableRecto', data.resultats_recto, 'recto');
+    fillTable('tableVerso', data.resultats_verso, 'verso');
+    fillFusionTable(data.resultats_recto, data.resultats_verso);
+
+    // Scroll to results
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fillTable(tableId, resultats, side) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    tbody.innerHTML = '';
+    if (!resultats || Object.keys(resultats).length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="color: var(--text-muted); text-align: center;">Aucun résultat</td></tr>';
+        return;
+    }
+    for (const [champ, data] of Object.entries(resultats)) {
+        const texte = typeof data === 'object' ? (data.texte_final || data.texte || data.text || '—') : data;
+        tbody.innerHTML += `<tr><td><strong>${champ}</strong></td><td>${texte}</td></tr>`;
+    }
+}
+
+function fillFusionTable(recto, verso) {
+    const tbody = document.querySelector('#tableFusion tbody');
+    tbody.innerHTML = '';
+    const all = {};
+
+    if (recto) Object.entries(recto).forEach(([k, v]) => { all[k] = { data: v, source: 'recto' }; });
+    if (verso) Object.entries(verso).forEach(([k, v]) => { all[k] = { data: v, source: 'verso' }; });
+
+    if (Object.keys(all).length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color: var(--text-muted); text-align: center;">Aucun résultat</td></tr>';
+        return;
+    }
+    for (const [champ, info] of Object.entries(all)) {
+        const texte = typeof info.data === 'object' ? (info.data.texte_final || info.data.texte || info.data.text || '—') : info.data;
+        const tagClass = info.source === 'recto' ? 'tag-recto' : 'tag-verso';
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${champ}</strong></td>
+                <td>${texte}</td>
+                <td><span class="tag ${tagClass}">${info.source}</span></td>
+            </tr>`;
+    }
+}
+
+// ── Init ──
+setupUpload('inputRecto', 'zoneRecto', 'previewRecto', 'badgeRecto', 'recto');
+setupUpload('inputVerso', 'zoneVerso', 'previewVerso', 'badgeVerso', 'verso');
+loadEntities();
+</script>
+
+</body>
+</html>

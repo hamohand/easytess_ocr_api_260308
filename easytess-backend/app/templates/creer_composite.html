@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTess — Créer une entité composite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-secondary: #1a1d2e;
+            --bg-card: #1e2235;
+            --bg-card-hover: #252a40;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --success: #00cec9;
+            --success-glow: rgba(0, 206, 201, 0.2);
+            --warning: #fdcb6e;
+            --danger: #ff6b6b;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8b8da3;
+            --text-muted: #5a5c72;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-accent: rgba(108, 92, 231, 0.3);
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border-bottom: 1px solid var(--border);
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-light), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .header .nav-link {
+            margin-left: auto;
+            color: var(--accent-light);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .header .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+
+        /* Form row */
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        option {
+            background: var(--bg-card);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.9rem;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+        }
+
+        .tab:first-child {
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+
+        .tab:last-child {
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .tab .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            margin-left: 0.4rem;
+        }
+
+        /* Page panel */
+        .page-panel {
+            display: none;
+        }
+
+        .page-panel.active {
+            display: block;
+        }
+
+        /* Canvas area */
+        .canvas-wrapper {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .canvas-side {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            display: block;
+            max-width: 100%;
+            cursor: crosshair;
+        }
+
+        .upload-prompt {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .upload-prompt .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-prompt .text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .upload-prompt .text strong {
+            color: var(--accent-light);
+            cursor: pointer;
+        }
+
+        /* Zone list */
+        .zone-list-panel {
+            flex: 0 0 320px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zone-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.4rem;
+            transition: background 0.2s;
+        }
+
+        .zone-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .zone-item .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .zone-item .zone-name {
+            flex: 1;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .zone-item .zone-lang {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .zone-item .zone-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0.2rem;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .zone-item .zone-delete:hover {
+            opacity: 1;
+        }
+
+        /* Zone form */
+        .zone-form {
+            display: none;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-top: 0.8rem;
+        }
+
+        .zone-form.visible {
+            display: block;
+        }
+
+        .zone-form .form-row {
+            margin-bottom: 0.6rem;
+        }
+
+        .zone-form input,
+        .zone-form select {
+            padding: 0.5rem 0.7rem;
+            font-size: 0.82rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #7c6cf0);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent-light);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, var(--success));
+            color: white;
+            box-shadow: 0 4px 15px var(--success-glow);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 0.45rem 0.8rem;
+            font-size: 0.78rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Status bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .status-bar .status-text {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        /* Instructions */
+        .instructions {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            padding: 0.6rem 0.8rem;
+            background: rgba(108, 92, 231, 0.08);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.8rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Drawing mode indicator */
+        .drawing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(255, 107, 107, 0.15);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--danger);
+            font-weight: 600;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 5;
+        }
+
+        .drawing-indicator.active {
+            display: flex;
+        }
+
+        .drawing-indicator .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Responsive padding for status bar */
+        .container {
+            padding-bottom: 5rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 200;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .toast.success {
+            background: #00b894;
+            color: white;
+        }
+
+        .toast.error {
+            background: var(--danger);
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="logo">EasyTess</div>
+        <div class="subtitle">Créer une entité composite</div>
+        <a class="nav-link" href="/appariement">→ Aller à l'appariement</a>
+    </div>
+
+    <div class="container">
+
+        <!-- Mode switcher -->
+        <div class="tabs" style="margin-bottom: 1.5rem;">
+            <div class="tab active" onclick="switchMode('manual')">✏️ Créer manuellement</div>
+            <div class="tab" onclick="switchMode('compose')">🔗 Composer à partir d'entités existantes</div>
+        </div>
+
+        <!-- Nom & Description (commun aux deux modes) -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom de l'entité</label>
+                <input type="text" id="entityName" placeholder="ex: cni_dz">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="entityDesc" placeholder="ex: CNI Algérie recto-verso">
+            </div>
+            <div class="form-group" style="flex: 0 0 200px;">
+                <label>Appariement</label>
+                <select id="matchMethod">
+                    <option value="numero_piece">Numéro de pièce</option>
+                    <option value="photo">Photo d'identité</option>
+                    <option value="combinee">Combinée</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 0 0 180px;">
+                <label>Champ commun</label>
+                <input type="text" id="matchField" placeholder="ex: numeroPiece" value="numeroPiece">
+            </div>
+        </div>
+
+        <!-- ========== MODE COMPOSE ========== -->
+        <div id="composePanel" style="display: none;">
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-title">🔗 Sélectionner les entités sources</div>
+                <div class="instructions">
+                    Choisissez une entité simple existante pour le recto et une pour le verso.
+                    Les zones, images de référence et cadres seront automatiquement réutilisés.
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>🪪 Entité Recto</label>
+                        <select id="composeRecto">
+                            <option value="">— Chargement... —</option>
+                        </select>
+                        <div id="composeRectoInfo"
+                            style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>🪪 Entité Verso</label>
+                        <select id="composeVerso">
+                            <option value="">— Chargement... —</option>
+                        </select>
+                        <div id="composeVersoInfo"
+                            style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== MODE MANUAL ========== -->
+        <div id="manualPanel">
+            <!-- Onglets Recto / Verso -->
+            <div class="tabs">
+                <div class="tab active" data-page="recto" onclick="switchTab('recto')">
+                    🪪 Recto <span class="badge" id="badgeRecto">0 zones</span>
+                </div>
+                <div class="tab" data-page="verso" onclick="switchTab('verso')">
+                    🪪 Verso <span class="badge" id="badgeVerso">0 zones</span>
+                </div>
+            </div>
+
+            <!-- Recto Panel -->
+            <div class="page-panel active" id="panel-recto">
+                <div class="canvas-wrapper">
+                    <div class="canvas-side">
+                        <div class="canvas-container" id="container-recto">
+                            <div class="drawing-indicator" id="drawIndicator-recto">
+                                <span class="pulse"></span> Mode dessin
+                            </div>
+                            <div class="upload-prompt" id="prompt-recto">
+                                <div class="icon">📷</div>
+                                <div class="text">
+                                    <strong onclick="document.getElementById('file-recto').click()">Cliquez pour
+                                        charger</strong>
+                                    l'image de référence du recto
+                                </div>
+                                <input type="file" id="file-recto" accept="image/*,.pdf" style="display:none"
+                                    onchange="handleImageUpload('recto', this.files[0])">
+                            </div>
+                            <canvas id="canvas-recto" style="display:none;"></canvas>
+                        </div>
+                    </div>
+                    <div class="zone-list-panel">
+                        <div class="card">
+                            <div class="card-title">📐 Zones du recto</div>
+                            <div class="instructions">
+                                Dessinez un rectangle sur l'image pour ajouter une zone OCR.
+                            </div>
+                            <div id="zoneList-recto"></div>
+                            <div class="zone-form" id="zoneForm-recto">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Nom du champ</label>
+                                        <input type="text" id="zoneName-recto" placeholder="ex: nom, prenom...">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Langue</label>
+                                        <select id="zoneLang-recto">
+                                            <option value="ara">Arabe</option>
+                                            <option value="fra">Français</option>
+                                            <option value="eng">Anglais</option>
+                                            <option value="ara+fra">Arabe + Français</option>
+                                            <option value="ber">Berbère</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prétraitement</label>
+                                        <select id="zonePreprocess-recto">
+                                            <option value="auto">Auto</option>
+                                            <option value="arabic_textured">Arabe texturé</option>
+                                            <option value="latin_simple">Latin simple</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-sm btn-block" onclick="confirmZone('recto')">
+                                    ✅ Ajouter cette zone
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verso Panel -->
+            <div class="page-panel" id="panel-verso">
+                <div class="canvas-wrapper">
+                    <div class="canvas-side">
+                        <div class="canvas-container" id="container-verso">
+                            <div class="drawing-indicator" id="drawIndicator-verso">
+                                <span class="pulse"></span> Mode dessin
+                            </div>
+                            <div class="upload-prompt" id="prompt-verso">
+                                <div class="icon">📷</div>
+                                <div class="text">
+                                    <strong onclick="document.getElementById('file-verso').click()">Cliquez pour
+                                        charger</strong>
+                                    l'image de référence du verso
+                                </div>
+                                <input type="file" id="file-verso" accept="image/*,.pdf" style="display:none"
+                                    onchange="handleImageUpload('verso', this.files[0])">
+                            </div>
+                            <canvas id="canvas-verso" style="display:none;"></canvas>
+                        </div>
+                    </div>
+                    <div class="zone-list-panel">
+                        <div class="card">
+                            <div class="card-title">📐 Zones du verso</div>
+                            <div class="instructions">
+                                Dessinez un rectangle sur l'image pour ajouter une zone OCR.
+                            </div>
+                            <div id="zoneList-verso"></div>
+                            <div class="zone-form" id="zoneForm-verso">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Nom du champ</label>
+                                        <input type="text" id="zoneName-verso"
+                                            placeholder="ex: adresse, dateDelivrance...">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Langue</label>
+                                        <select id="zoneLang-verso">
+                                            <option value="ara">Arabe</option>
+                                            <option value="fra">Français</option>
+                                            <option value="eng">Anglais</option>
+                                            <option value="ara+fra">Arabe + Français</option>
+                                            <option value="ber">Berbère</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prétraitement</label>
+                                        <select id="zonePreprocess-verso">
+                                            <option value="auto">Auto</option>
+                                            <option value="arabic_textured">Arabe texturé</option>
+                                            <option value="latin_simple">Latin simple</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-sm btn-block" onclick="confirmZone('verso')">
+                                    ✅ Ajouter cette zone
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- /manualPanel -->
+
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-text" id="statusText">Prêt — Chargez vos images et dessinez les zones</div>
+        <div style="display: flex; gap: 0.8rem;">
+            <a href="/appariement" class="btn btn-outline btn-sm">↗ Tester l'appariement</a>
+            <button class="btn btn-success" id="btnSave" onclick="saveEntity()" disabled>
+                💾 Sauvegarder l'entité
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin;
+
+        // ── State ──
+        const state = {
+            recto: { image: null, filename: null, zones: [], tempRect: null, drawing: false },
+            verso: { image: null, filename: null, zones: [], tempRect: null, drawing: false }
+        };
+
+        const ZONE_COLORS = ['#6c5ce7', '#00cec9', '#fd79a8', '#fdcb6e', '#e17055', '#74b9ff', '#a29bfe', '#55efc4'];
+        let activeTab = 'recto';
+        let currentMode = 'manual';
+        let simpleEntities = []; // cached simple entities list
+
+        // ── Mode switching ──
+        function switchMode(mode) {
+            currentMode = mode;
+            const modeTabs = document.querySelectorAll('.container > .tabs:first-of-type .tab');
+            modeTabs[0].classList.toggle('active', mode === 'manual');
+            modeTabs[1].classList.toggle('active', mode === 'compose');
+            document.getElementById('manualPanel').style.display = mode === 'manual' ? 'block' : 'none';
+            document.getElementById('composePanel').style.display = mode === 'compose' ? 'block' : 'none';
+            if (mode === 'compose') loadSimpleEntities();
+            updateSaveButton();
+        }
+
+        // ── Load simple entities for compose mode ──
+        async function loadSimpleEntities() {
+            try {
+                const res = await fetch(`${API}/api/entites`);
+                const all = await res.json();
+                simpleEntities = all.filter(e => e.type === 'simple' || (!e.pages && !e.type));
+
+                const buildOptions = () => {
+                    let html = '<option value="">— Sélectionner une entité simple —</option>';
+                    simpleEntities.forEach(e => {
+                        const nz = (e.zones || []).length;
+                        html += `<option value="${e.nom}">${e.nom} — ${e.description || ''} (${nz} zones)</option>`;
+                    });
+                    return html;
+                };
+                document.getElementById('composeRecto').innerHTML = buildOptions();
+                document.getElementById('composeVerso').innerHTML = buildOptions();
+            } catch (err) {
+                console.error('Erreur chargement entités:', err);
+            }
+        }
+
+        // Show entity info on selection
+        document.getElementById('composeRecto').addEventListener('change', (e) => {
+            showEntityInfo('composeRectoInfo', e.target.value);
+            updateSaveButton();
+        });
+        document.getElementById('composeVerso').addEventListener('change', (e) => {
+            showEntityInfo('composeVersoInfo', e.target.value);
+            updateSaveButton();
+        });
+
+        function showEntityInfo(infoId, entityName) {
+            const div = document.getElementById(infoId);
+            if (!entityName) { div.innerHTML = ''; return; }
+            const ent = simpleEntities.find(e => e.nom === entityName);
+            if (!ent) return;
+            const zones = (ent.zones || []).map(z => z.nom).join(', ');
+            div.innerHTML = `<span style="color: var(--success);">✅</span> ${(ent.zones || []).length} zones : <strong>${zones}</strong>`;
+        }
+
+        // ── Tabs ──
+        function switchTab(page) {
+            activeTab = page;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
+            document.querySelectorAll('.page-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${page}`));
+        }
+
+        // ── Image Upload ──
+        async function handleImageUpload(page, file) {
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('page_id', page);
+
+            setStatus(`⏳ Upload de l'image ${page}...`);
+
+            try {
+                const res = await fetch(`${API}/api/upload-image-entite-page`, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!data.success) { setStatus(`❌ Erreur: ${data.error}`); return; }
+
+                state[page].filename = data.filename;
+
+                // Load the image on canvas
+                const img = new window.Image();
+                img.onload = () => {
+                    state[page].image = img;
+                    initCanvas(page, img);
+                    setStatus(`✅ Image ${page} chargée (${img.width}×${img.height})`);
+                };
+                img.src = data.image_url;
+
+            } catch (err) {
+                setStatus(`❌ Erreur réseau: ${err.message}`);
+            }
+        }
+
+        // ── Canvas ──
+        function initCanvas(page, img) {
+            const container = document.getElementById(`container-${page}`);
+            const canvas = document.getElementById(`canvas-${page}`);
+            const prompt = document.getElementById(`prompt-${page}`);
+            const ctx = canvas.getContext('2d');
+
+            prompt.style.display = 'none';
+            canvas.style.display = 'block';
+
+            // Fit canvas to container width
+            const maxW = container.clientWidth;
+            const scale = maxW / img.width;
+            canvas.width = maxW;
+            canvas.height = img.height * scale;
+
+            canvas.__scale = scale;
+            canvas.__imgW = img.width;
+            canvas.__imgH = img.height;
+
+            drawCanvas(page);
+            setupCanvasEvents(page);
+        }
+
+        function drawCanvas(page) {
+            const canvas = document.getElementById(`canvas-${page}`);
+            const ctx = canvas.getContext('2d');
+            const img = state[page].image;
+            if (!img) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Draw existing zones
+            state[page].zones.forEach((zone, i) => {
+                const color = ZONE_COLORS[i % ZONE_COLORS.length];
+                const [rx1, ry1, rx2, ry2] = zone.coords;
+                const x1 = rx1 * canvas.width, y1 = ry1 * canvas.height;
+                const x2 = rx2 * canvas.width, y2 = ry2 * canvas.height;
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                ctx.fillStyle = color + '20';
+                ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+
+                // Label
+                ctx.fillStyle = color;
+                ctx.font = '600 13px Inter';
+                const label = `${i + 1}. ${zone.nom}`;
+                const tw = ctx.measureText(label).width;
+                ctx.fillStyle = '#000a';
+                ctx.fillRect(x1, y1 - 20, tw + 10, 20);
+                ctx.fillStyle = color;
+                ctx.fillText(label, x1 + 5, y1 - 5);
+            });
+
+            // Temp drawing rect
+            if (state[page].tempRect) {
+                const r = state[page].tempRect;
+                // Remplissage coloré semi-transparent
+                ctx.fillStyle = 'rgba(0, 206, 201, 0.15)';
+                ctx.fillRect(r.x, r.y, r.w, r.h);
+                // Bordure épaisse cyan
+                ctx.setLineDash([8, 4]);
+                ctx.strokeStyle = '#00cec9';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(r.x, r.y, r.w, r.h);
+                ctx.setLineDash([]);
+                // Ombre extérieure pour contraste sur fond clair
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2);
+            }
+        }
+
+        function setupCanvasEvents(page) {
+            const canvas = document.getElementById(`canvas-${page}`);
+            let startX, startY, isDragging = false;
+
+            canvas.onmousedown = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                startX = e.clientX - rect.left;
+                startY = e.clientY - rect.top;
+                isDragging = true;
+                document.getElementById(`drawIndicator-${page}`).classList.add('active');
+            };
+
+            canvas.onmousemove = (e) => {
+                if (!isDragging) return;
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                state[page].tempRect = {
+                    x: Math.min(startX, mx), y: Math.min(startY, my),
+                    w: Math.abs(mx - startX), h: Math.abs(my - startY)
+                };
+                drawCanvas(page);
+            };
+
+            canvas.onmouseup = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.getElementById(`drawIndicator-${page}`).classList.remove('active');
+
+                const r = state[page].tempRect;
+                if (!r || r.w < 10 || r.h < 10) {
+                    state[page].tempRect = null;
+                    drawCanvas(page);
+                    return;
+                }
+
+                // Convert to relative coords
+                const coords = [
+                    r.x / canvas.width,
+                    r.y / canvas.height,
+                    (r.x + r.w) / canvas.width,
+                    (r.y + r.h) / canvas.height
+                ];
+
+                state[page].pendingCoords = coords;
+
+                // Show form
+                const form = document.getElementById(`zoneForm-${page}`);
+                form.classList.add('visible');
+                document.getElementById(`zoneName-${page}`).focus();
+                setStatus(`Zone dessinée — Renseignez le nom du champ et validez`);
+            };
+        }
+
+        function confirmZone(page) {
+            const name = document.getElementById(`zoneName-${page}`).value.trim();
+            const lang = document.getElementById(`zoneLang-${page}`).value;
+            const preprocess = document.getElementById(`zonePreprocess-${page}`).value;
+
+            if (!name) { document.getElementById(`zoneName-${page}`).focus(); return; }
+            if (!state[page].pendingCoords) return;
+
+            const zone = {
+                id: Date.now(),
+                nom: name,
+                coords: state[page].pendingCoords,
+                lang: lang,
+                preprocess: preprocess,
+                type: 'text'
+            };
+
+            state[page].zones.push(zone);
+            state[page].tempRect = null;
+            state[page].pendingCoords = null;
+
+            // Reset form
+            document.getElementById(`zoneName-${page}`).value = '';
+            document.getElementById(`zoneForm-${page}`).classList.remove('visible');
+
+            drawCanvas(page);
+            updateZoneList(page);
+            updateSaveButton();
+            setStatus(`✅ Zone "${name}" ajoutée au ${page}`);
+        }
+
+        function removeZone(page, id) {
+            state[page].zones = state[page].zones.filter(z => z.id !== id);
+            drawCanvas(page);
+            updateZoneList(page);
+            updateSaveButton();
+        }
+
+        function updateZoneList(page) {
+            const list = document.getElementById(`zoneList-${page}`);
+            const badge = document.getElementById(`badge${page.charAt(0).toUpperCase() + page.slice(1)}`);
+            badge.textContent = `${state[page].zones.length} zone${state[page].zones.length !== 1 ? 's' : ''}`;
+
+            if (state[page].zones.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 1rem; font-size: 0.82rem;">Aucune zone définie</div>';
+                return;
+            }
+
+            list.innerHTML = state[page].zones.map((z, i) => `
+        <div class="zone-item">
+            <div class="color-dot" style="background: ${ZONE_COLORS[i % ZONE_COLORS.length]}"></div>
+            <div class="zone-name">${z.nom}</div>
+            <div class="zone-lang">${z.lang}</div>
+            <button class="zone-delete" onclick="removeZone('${page}', ${z.id})" title="Supprimer">✕</button>
+        </div>
+    `).join('');
+        }
+
+        // ── Save ──
+        function updateSaveButton() {
+            const name = document.getElementById('entityName').value.trim();
+
+            if (currentMode === 'manual') {
+                const hasRecto = state.recto.filename && state.recto.zones.length > 0;
+                const hasVerso = state.verso.filename && state.verso.zones.length > 0;
+                document.getElementById('btnSave').disabled = !(name && hasRecto && hasVerso);
+            } else {
+                const rectoEnt = document.getElementById('composeRecto').value;
+                const versoEnt = document.getElementById('composeVerso').value;
+                document.getElementById('btnSave').disabled = !(name && rectoEnt && versoEnt && rectoEnt !== versoEnt);
+            }
+        }
+
+        document.getElementById('entityName').addEventListener('input', updateSaveButton);
+
+        async function saveEntity() {
+            const nom = document.getElementById('entityName').value.trim();
+            const description = document.getElementById('entityDesc').value.trim();
+            const matchMethod = document.getElementById('matchMethod').value;
+            const matchField = document.getElementById('matchField').value.trim();
+
+            if (!nom) return;
+
+            setStatus('⏳ Sauvegarde en cours...');
+            document.getElementById('btnSave').disabled = true;
+
+            let url, body;
+
+            if (currentMode === 'compose') {
+                // Mode composition à partir d'entités existantes
+                url = `${API}/api/composer-entite-composite`;
+                body = {
+                    nom: nom,
+                    description: description,
+                    entite_recto: document.getElementById('composeRecto').value,
+                    entite_verso: document.getElementById('composeVerso').value,
+                    appariement: {
+                        methode: matchMethod,
+                        champ_commun: matchField
+                    }
+                };
+            } else {
+                // Mode manuel
+                url = `${API}/api/sauvegarder-entite-composite`;
+                body = {
+                    nom: nom,
+                    description: description,
+                    pages: {
+                        recto: {
+                            image_filename: state.recto.filename,
+                            zones: state.recto.zones
+                        },
+                        verso: {
+                            image_filename: state.verso.filename,
+                            zones: state.verso.zones
+                        }
+                    },
+                    appariement: {
+                        methode: matchMethod,
+                        champ_commun: matchField
+                    }
+                };
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    setStatus(`✅ Entité "${nom}" sauvegardée avec succès !`);
+                    showToast(data.message || `Entité "${nom}" créée !`, 'success');
+                } else {
+                    setStatus(`❌ Erreur : ${data.error}`);
+                    showToast(`Erreur : ${data.error}`, 'error');
+                }
+            } catch (err) {
+                setStatus(`❌ Erreur réseau : ${err.message}`);
+                showToast(`Erreur réseau`, 'error');
+            }
+
+            document.getElementById('btnSave').disabled = false;
+        }
+
+        // ── Helpers ──
+        function setStatus(text) {
+            document.getElementById('statusText').innerHTML = text;
+        }
+
+        function showToast(msg, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // Init
+        updateZoneList('recto');
+        updateZoneList('verso');
+    </script>
+
+</body>
+
+</html>

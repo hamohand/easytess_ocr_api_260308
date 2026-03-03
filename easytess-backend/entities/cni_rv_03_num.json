@@ -1,0 +1,70 @@
+{
+  "nom": "cni_rv_03_num",
+  "description": "cni_rv_num",
+  "type": "composite",
+  "date_creation": "2026-03-03T16:32:11.099209",
+  "pages": {
+    "recto": {
+      "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_rv_03_num\\recto_reference.jpeg",
+      "zones": [
+        {
+          "id": 1772551892707,
+          "nom": "numeroPiece",
+          "coords": [
+            0.2818003715352809,
+            0.2026973058504537,
+            0.48711952047145113,
+            0.27936941025502143
+          ],
+          "lang": "fra",
+          "preprocess": "latin_simple",
+          "type": "text"
+        }
+      ],
+      "cadre_reference": null,
+      "zone_photo": null,
+      "metadata": {
+        "nombre_zones": 1,
+        "image_dimensions": {
+          "width": 663,
+          "height": 433
+        }
+      }
+    },
+    "verso": {
+      "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_rv_03_num\\verso_reference.jpeg",
+      "zones": [
+        {
+          "id": 1772551927927,
+          "nom": "numeroPiece",
+          "coords": [
+            0.20201313749272773,
+            0.630561029343378,
+            0.48711952047145113,
+            0.7178626166449653
+          ],
+          "lang": "fra",
+          "preprocess": "latin_simple",
+          "type": "text"
+        }
+      ],
+      "cadre_reference": null,
+      "zone_photo": null,
+      "metadata": {
+        "nombre_zones": 1,
+        "image_dimensions": {
+          "width": 653,
+          "height": 438
+        }
+      }
+    }
+  },
+  "appariement": {
+    "methode": "numero_piece",
+    "champ_commun": "numeroPiece"
+  },
+  "metadata": {
+    "nombre_pages": 2,
+    "nombre_zones_total": 2
+  }
+}

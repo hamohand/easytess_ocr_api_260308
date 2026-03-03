@@ -187,3 +187,67 @@ export interface ConvertPdfResponse {
     statistiques: ExtractionStats;
     message: string;
 }
+
+// ─── Composite entity models ───────────────────────────
+
+export interface PageComposite {
+    image_path?: string;
+    zones: Zone[];
+    cadre_reference?: CadreReference;
+    zone_photo?: [number, number, number, number];
+    entite_source?: string; // Nom de l'entité simple source (mode compose)
+}
+
+export interface AppariementConfig {
+    methode: 'numero_piece' | 'photo' | 'combinee';
+    champ_commun?: string;
+}
+
+export interface EntiteComposite {
+    nom: string;
+    description?: string;
+    type: 'composite';
+    date_creation?: string;
+    pages: {
+        recto: PageComposite;
+        verso: PageComposite;
+    };
+    appariement?: AppariementConfig;
+}
+
+export interface AppariementDetailNumero {
+    match: boolean;
+    score: number;
+    recto: string;
+    verso: string;
+    erreur?: string;
+}
+
+export interface AppariementDetailPhoto {
+    match: boolean;
+    score_ssim: number;
+    score_orb?: number;
+    methode_decisive?: string;
+    erreur?: string;
+}
+
+export interface AppariementResult {
+    apparie: boolean | null;
+    confiance: number;
+    details: {
+        numero?: AppariementDetailNumero;
+        photo?: AppariementDetailPhoto;
+    };
+    erreur?: string;
+}
+
+export interface AppariementResponse {
+    success: boolean;
+    entite: string;
+    resultats_recto: { [key: string]: ResultatOCR };
+    alertes_recto: string[];
+    resultats_verso: { [key: string]: ResultatOCR };
+    alertes_verso: string[];
+    resultats_fusionnes: { [key: string]: ResultatOCR };
+    appariement: AppariementResult;
+}

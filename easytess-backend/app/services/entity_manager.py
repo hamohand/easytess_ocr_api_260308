@@ -87,6 +87,52 @@ class EntityManager:
         
         return fichier_entite
     
+    def composer_entite_composite(self, nom_entite, entite_recto_nom, entite_verso_nom,
+                                   description='', appariement=None):
+        """Crée une entité composite à partir de deux entités simples existantes.
+        
+        Args:
+            nom_entite: Nom de la nouvelle entité composite
+            entite_recto_nom: Nom de l'entité simple pour le recto
+            entite_verso_nom: Nom de l'entité simple pour le verso
+            description: Description de l'entité composite
+            appariement: Config d'appariement optionnelle
+        """
+        entite_recto = self.charger_entite(entite_recto_nom)
+        entite_verso = self.charger_entite(entite_verso_nom)
+        
+        if not entite_recto:
+            raise ValueError(f"Entité recto '{entite_recto_nom}' non trouvée")
+        if not entite_verso:
+            raise ValueError(f"Entité verso '{entite_verso_nom}' non trouvée")
+        
+        if self.is_composite(entite_recto):
+            raise ValueError(f"'{entite_recto_nom}' est déjà composite, utilisez une entité simple")
+        if self.is_composite(entite_verso):
+            raise ValueError(f"'{entite_verso_nom}' est déjà composite, utilisez une entité simple")
+        
+        # Construire les pages à partir des entités simples
+        pages = {
+            'recto': {
+                'image_path': entite_recto.get('image_reference'),
+                'zones': entite_recto.get('zones', []),
+                'cadre_reference': entite_recto.get('cadre_reference'),
+                'zone_photo': None,
+                'entite_source': entite_recto_nom
+            },
+            'verso': {
+                'image_path': entite_verso.get('image_reference'),
+                'zones': entite_verso.get('zones', []),
+                'cadre_reference': entite_verso.get('cadre_reference'),
+                'zone_photo': None,
+                'entite_source': entite_verso_nom
+            }
+        }
+        
+        return self.sauvegarder_entite_composite(
+            nom_entite, pages, description, appariement
+        )
+    
     @staticmethod
     def is_composite(entite):
         """Retourne True si l'entité est composite (multi-pages)"""

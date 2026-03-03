@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_cors import CORS
 import os
 import logging
@@ -48,8 +48,17 @@ def create_app(config_class=Config):
             "endpoints": {
                 "ocr": "/api/analyser",
                 "entities": "/api/entites",
-                "upload": "/api/upload"
+                "upload": "/api/upload",
+                "appariement_ui": "/appariement"
             }
         }
+    
+    @app.route('/appariement')
+    def page_appariement():
+        return render_template('appariement.html')
+    
+    @app.route('/creer-composite')
+    def page_creer_composite():
+        return render_template('creer_composite.html')
     
     return app

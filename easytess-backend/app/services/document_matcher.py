@@ -295,13 +295,39 @@ def _calculer_orb_similarity(img1, img2, min_matches=5):
 
 
 def _extraire_texte_champ(resultats, champ):
-    """Extrait le texte final d'un champ dans les résultats OCR."""
-    if not resultats or champ not in resultats:
+    """Extrait le texte final d'un champ dans les résultats OCR.
+    
+    Recherche flexible : essaie la clé exacte, puis une recherche
+    normalisée (insensible à la casse, underscores, tirets).
+    Ex: "numeroPiece" matche "numpiece", "numero_piece", "NUMEROPIECE", etc.
+    """
+    if not resultats:
         return None
 
-    champ_data = resultats[champ]
+    # 1. Clé exacte
+    champ_data = resultats.get(champ)
+
+    # 2. Fallback : recherche normalisée
+    if champ_data is None:
+        champ_norm = _normaliser_cle(champ)
+        for key, value in resultats.items():
+            if _normaliser_cle(key) == champ_norm:
+                champ_data = value
+                logger.info(f"🔗 Champ '{champ}' trouvé via match normalisé → '{key}'")
+                break
+
+    if champ_data is None:
+        return None
+
     if isinstance(champ_data, dict):
         return champ_data.get("texte_final") or champ_data.get("texte") or champ_data.get("text")
     elif isinstance(champ_data, str):
         return champ_data
     return None
+
+
+def _normaliser_cle(cle):
+    """Normalise une clé pour comparaison flexible.
+    'numeroPiece' → 'numeropiece', 'numero_piece' → 'numeropiece'
+    """
+    return cle.lower().replace('_', '').replace('-', '').replace(' ', '')

@@ -600,3 +600,51 @@ def sauvegarder_entite_composite():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@entity_bp.route('/api/composer-entite-composite', methods=['POST'])
+def composer_entite_composite():
+    """Crée une entité composite à partir de deux entités simples existantes.
+    
+    Body JSON:
+    {
+        "nom": "cni_dz_composite",
+        "description": "CNI DZ recto-verso",
+        "entite_recto": "cni_simple_recto",
+        "entite_verso": "cni_simple_verso",
+        "appariement": {
+            "methode": "combinee",
+            "champ_commun": "numeroPiece"
+        }
+    }
+    """
+    data = request.json or {}
+    nom = data.get('nom', '').strip()
+    description = data.get('description', '')
+    entite_recto_nom = data.get('entite_recto', '').strip()
+    entite_verso_nom = data.get('entite_verso', '').strip()
+    appariement = data.get('appariement')
+    
+    if not nom:
+        return jsonify({'error': 'Nom de l\'entité manquant'}), 400
+    if not entite_recto_nom or not entite_verso_nom:
+        return jsonify({'error': 'Les deux entités sources (recto et verso) sont requises'}), 400
+    if entite_recto_nom == entite_verso_nom:
+        return jsonify({'error': 'Les entités recto et verso doivent être différentes'}), 400
+    
+    try:
+        manager = current_app.entity_manager
+        fichier = manager.composer_entite_composite(
+            nom, entite_recto_nom, entite_verso_nom,
+            description=description,
+            appariement=appariement
+        )
+        
+        return jsonify({
+            'success': True,
+            'fichier': fichier,
+            'message': f'Entité composite "{nom}" créée à partir de "{entite_recto_nom}" (recto) et "{entite_verso_nom}" (verso)'
+        })
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

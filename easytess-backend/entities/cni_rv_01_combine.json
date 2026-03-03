@@ -1,0 +1,96 @@
+{
+  "nom": "cni_rv_01_combine",
+  "description": "cni_rv_01_combine",
+  "type": "composite",
+  "date_creation": "2026-03-03T17:18:46.342819",
+  "pages": {
+    "recto": {
+      "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_rv_01_combine\\recto_reference.jpeg",
+      "zones": [
+        {
+          "id": 1772554563401,
+          "nom": "numeroPiece",
+          "coords": [
+            0.3073322864288979,
+            0.20106598448014376,
+            0.48180037153528094,
+            0.2858946957362612
+          ],
+          "lang": "ara",
+          "preprocess": "auto",
+          "type": "text"
+        },
+        {
+          "id": 1772554619501,
+          "nom": "photo",
+          "coords": [
+            0.34563015876932346,
+            0.34299094369710953,
+            0.4232897332374086,
+            0.49796647387655485
+          ],
+          "lang": "ara",
+          "preprocess": "auto",
+          "type": "text"
+        }
+      ],
+      "cadre_reference": null,
+      "zone_photo": null,
+      "metadata": {
+        "nombre_zones": 2,
+        "image_dimensions": {
+          "width": 663,
+          "height": 433
+        }
+      }
+    },
+    "verso": {
+      "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_rv_01_combine\\verso_reference.jpeg",
+      "zones": [
+        {
+          "id": 1772554706547,
+          "nom": "numeroPiece",
+          "coords": [
+            0.20520462685442986,
+            0.6400848388671875,
+            0.4860556906842171,
+            0.7210372198195685
+          ],
+          "lang": "ara",
+          "preprocess": "auto",
+          "type": "text"
+        },
+        {
+          "id": 1772554721429,
+          "nom": "photo",
+          "coords": [
+            0.5956301587693235,
+            0.34802134680369545,
+            0.6647790949395362,
+            0.4924657912481399
+          ],
+          "lang": "ara",
+          "preprocess": "auto",
+          "type": "text"
+        }
+      ],
+      "cadre_reference": null,
+      "zone_photo": null,
+      "metadata": {
+        "nombre_zones": 2,
+        "image_dimensions": {
+          "width": 653,
+          "height": 438
+        }
+      }
+    }
+  },
+  "appariement": {
+    "methode": "combinee",
+    "champ_commun": "numeroPiece"
+  },
+  "metadata": {
+    "nombre_pages": 2,
+    "nombre_zones_total": 4
+  }
+}

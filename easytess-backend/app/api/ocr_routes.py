@@ -495,12 +495,29 @@ def api_apparier_recto_verso():
         
         # --- Appariement ---
         config_appariement = entite.get('appariement', {})
+        if not config_appariement:
+            config_appariement = {}
+        else:
+            config_appariement = dict(config_appariement)  # copie pour ne pas modifier l'entité
         
         # Enrichir la config avec les zone_photo depuis les pages
+        # 1. Explicitement défini dans l'entité
         if page_recto.get('zone_photo'):
             config_appariement['zone_photo_recto'] = page_recto['zone_photo']
         if page_verso.get('zone_photo'):
             config_appariement['zone_photo_verso'] = page_verso['zone_photo']
+        
+        # 2. Auto-détection : chercher une zone nommée "photo" dans les zones OCR
+        if not config_appariement.get('zone_photo_recto'):
+            photo_zone = _trouver_zone_photo(page_recto.get('zones', []))
+            if photo_zone:
+                config_appariement['zone_photo_recto'] = photo_zone
+                current_app.logger.info(f"📸 Zone photo auto-détectée sur le recto: {photo_zone}")
+        if not config_appariement.get('zone_photo_verso'):
+            photo_zone = _trouver_zone_photo(page_verso.get('zones', []))
+            if photo_zone:
+                config_appariement['zone_photo_verso'] = photo_zone
+                current_app.logger.info(f"📸 Zone photo auto-détectée sur le verso: {photo_zone}")
         
         images_info = {
             'recto_path': recto_path,
@@ -530,3 +547,18 @@ def api_apparier_recto_verso():
     except Exception as e:
         current_app.logger.error(f"Erreur appariement: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+def _trouver_zone_photo(zones):
+    """Cherche automatiquement une zone nommée 'photo' dans la liste des zones.
+    
+    Retourne les coordonnées [x1, y1, x2, y2] de la zone photo, ou None.
+    """
+    PHOTO_NAMES = {'photo', 'photo_identite', 'photoidentite', 'portrait', 'visage'}
+    for zone in zones:
+        nom = zone.get('nom', '').lower().replace(' ', '_').replace('-', '_')
+        if nom in PHOTO_NAMES:
+            coords = zone.get('coords')
+            if coords and len(coords) == 4:
+                return coords
+    return None
