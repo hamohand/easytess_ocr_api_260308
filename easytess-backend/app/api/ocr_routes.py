@@ -405,3 +405,128 @@ def api_corrections():
     alertes = session.get('alertes', [])
     zones_a_corriger = {k: v for k, v in resultats.items() if k in alertes}
     return jsonify(zones_a_corriger)
+
+
+# =============================================
+# APPARIEMENT RECTO/VERSO
+# =============================================
+
+@ocr_bp.route('/api/apparier-recto-verso', methods=['POST'])
+def api_apparier_recto_verso():
+    """
+    Analyse deux images (recto/verso) d'une entité composite et vérifie
+    qu'elles appartiennent à la même pièce d'identité.
+    
+    Body JSON:
+    {
+        "entite": "cni_dz",
+        "image_recto": "filename_recto.jpg",
+        "image_verso": "filename_verso.jpg"
+    }
+    
+    Returns:
+    {
+        "success": true,
+        "resultats_recto": { ... },
+        "resultats_verso": { ... },
+        "resultats_fusionnes": { ... },
+        "appariement": {
+            "apparie": true,
+            "confiance": 0.92,
+            "details": { "numero": {...}, "photo": {...} }
+        }
+    }
+    """
+    from app.services.document_matcher import apparier_documents
+    from app.services.entity_manager import EntityManager
+    
+    data = request.json or {}
+    entite_nom = data.get('entite')
+    image_recto_filename = data.get('image_recto')
+    image_verso_filename = data.get('image_verso')
+    
+    if not entite_nom:
+        return jsonify({'error': 'Nom d\'entité manquant'}), 400
+    if not image_recto_filename or not image_verso_filename:
+        return jsonify({'error': 'Les deux images (recto et verso) sont requises'}), 400
+    
+    # Charger l'entité
+    manager = current_app.entity_manager
+    entite = manager.charger_entite(entite_nom)
+    if not entite:
+        return jsonify({'error': f'Entité "{entite_nom}" non trouvée'}), 404
+    
+    if not EntityManager.is_composite(entite):
+        return jsonify({'error': f'L\'entité "{entite_nom}" n\'est pas composite (recto/verso)'}), 400
+    
+    pages = entite.get('pages', {})
+    if 'recto' not in pages or 'verso' not in pages:
+        return jsonify({'error': 'L\'entité composite doit avoir une page "recto" et une page "verso"'}), 400
+    
+    # Résoudre les chemins des images
+    recto_path = _resolve_image_path(image_recto_filename)
+    verso_path = _resolve_image_path(image_verso_filename)
+    
+    if not recto_path:
+        return jsonify({'error': f'Image recto non trouvée: {image_recto_filename}'}), 404
+    if not verso_path:
+        return jsonify({'error': f'Image verso non trouvée: {image_verso_filename}'}), 404
+    
+    try:
+        # --- Analyser le recto ---
+        page_recto = pages['recto']
+        zones_recto = {z['nom']: {k: v for k, v in z.items() if k != 'nom'} for z in page_recto.get('zones', [])}
+        cadre_recto = page_recto.get('cadre_reference')
+        
+        resultats_recto, alertes_recto = analyser_hybride(recto_path, zones_recto, cadre_reference=cadre_recto)
+        if resultats_recto is None:
+            resultats_recto = {}
+            current_app.logger.warning(f"⚠️ OCR recto échoué: {alertes_recto}")
+        
+        # --- Analyser le verso ---
+        page_verso = pages['verso']
+        zones_verso = {z['nom']: {k: v for k, v in z.items() if k != 'nom'} for z in page_verso.get('zones', [])}
+        cadre_verso = page_verso.get('cadre_reference')
+        
+        resultats_verso, alertes_verso = analyser_hybride(verso_path, zones_verso, cadre_reference=cadre_verso)
+        if resultats_verso is None:
+            resultats_verso = {}
+            current_app.logger.warning(f"⚠️ OCR verso échoué: {alertes_verso}")
+        
+        # --- Appariement ---
+        config_appariement = entite.get('appariement', {})
+        
+        # Enrichir la config avec les zone_photo depuis les pages
+        if page_recto.get('zone_photo'):
+            config_appariement['zone_photo_recto'] = page_recto['zone_photo']
+        if page_verso.get('zone_photo'):
+            config_appariement['zone_photo_verso'] = page_verso['zone_photo']
+        
+        images_info = {
+            'recto_path': recto_path,
+            'verso_path': verso_path
+        }
+        
+        result_appariement = apparier_documents(
+            resultats_recto, resultats_verso,
+            config_appariement, images_info
+        )
+        
+        # --- Fusionner les résultats ---
+        resultats_fusionnes = {}
+        resultats_fusionnes.update(resultats_recto)
+        resultats_fusionnes.update(resultats_verso)
+        
+        return jsonify({
+            'success': True,
+            'resultats_recto': resultats_recto,
+            'alertes_recto': alertes_recto if isinstance(alertes_recto, list) else [alertes_recto] if alertes_recto else [],
+            'resultats_verso': resultats_verso,
+            'alertes_verso': alertes_verso if isinstance(alertes_verso, list) else [alertes_verso] if alertes_verso else [],
+            'resultats_fusionnes': resultats_fusionnes,
+            'appariement': result_appariement
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Erreur appariement: {e}")
+        return jsonify({'error': str(e)}), 500

@@ -11,3 +11,4 @@ pdfplumber
 pyzbar
 python-docx
 APScheduler
+scikit-image

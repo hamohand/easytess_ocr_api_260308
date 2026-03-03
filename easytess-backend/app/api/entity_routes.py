@@ -433,3 +433,170 @@ def supprimer_entite(nom):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+# =============================================
+# ENTITÉS COMPOSITES (recto/verso)
+# =============================================
+
+@entity_bp.route('/api/upload-image-entite-page', methods=['POST'])
+def upload_image_entite_page():
+    """Upload d'une image pour une page spécifique d'une entité composite (recto, verso, etc.)"""
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file'}), 400
+    file = request.files['image']
+    page_id = request.form.get('page_id', 'recto')  # ex: "recto", "verso"
+
+    if file.filename == '':
+        return jsonify({'error': 'No filename'}), 400
+    
+    filename = secure_filename(file.filename)
+    saved_filename = f"temp_entite_{page_id}_{str(uuid.uuid4())}_{filename}"
+    temp_folder = current_app.config['UPLOAD_TEMP_FOLDER']
+    filepath = os.path.join(temp_folder, saved_filename)
+    file.save(filepath)
+    
+    # Conversion PDF -> Image si nécessaire
+    if filename.lower().endswith('.pdf'):
+        try:
+            image_filename = f"{os.path.splitext(saved_filename)[0]}.jpg"
+            image_filepath = os.path.join(temp_folder, image_filename)
+            convert_pdf_to_image(filepath, image_filepath)
+            saved_filename = image_filename
+            filepath = image_filepath
+        except Exception as e:
+            return jsonify({'error': f'Erreur lors de la conversion PDF: {str(e)}'}), 500
+    
+    try:
+        with Image.open(filepath) as img:
+            width, height = img.size
+    except:
+        width, height = 0, 0
+    
+    # Stocker en session le chemin par page
+    if 'temp_images_pages' not in session:
+        session['temp_images_pages'] = {}
+    session['temp_images_pages'][page_id] = filepath
+    session.modified = True
+    
+    base_url = request.host_url.rstrip('/')
+    image_url = f"{base_url}/uploads_temp/{saved_filename}"
+    
+    return jsonify({
+        'success': True,
+        'page_id': page_id,
+        'filepath': filepath,
+        'filename': saved_filename,
+        'image_url': image_url,
+        'dimensions': {'width': width, 'height': height}
+    })
+
+
+@entity_bp.route('/api/sauvegarder-entite-composite', methods=['POST'])
+def sauvegarder_entite_composite():
+    """Sauvegarde une entité composite (multi-pages, ex: recto/verso).
+    
+    Body JSON:
+    {
+        "nom": "cni_dz",
+        "description": "CNI DZ recto-verso",
+        "pages": {
+            "recto": {
+                "zones": [...],
+                "image_filename": "temp_recto_xxx.jpg",
+                "cadre_reference": {...}
+            },
+            "verso": {
+                "zones": [...],
+                "image_filename": "temp_verso_xxx.jpg",
+                "cadre_reference": {...}
+            }
+        },
+        "appariement": {
+            "methode": "numero_piece",
+            "champ_commun": "numeroPiece"
+        }
+    }
+    """
+    import shutil
+    
+    data = request.json
+    nom = data.get('nom')
+    description = data.get('description', '')
+    pages_input = data.get('pages', {})
+    appariement = data.get('appariement')
+    
+    if not nom:
+        return jsonify({'error': 'Nom manquant'}), 400
+    if not pages_input:
+        return jsonify({'error': 'Aucune page définie'}), 400
+    
+    # Préparer les pages avec chemins d'images permanents
+    pages_prepared = {}
+    temp_folder = current_app.config['UPLOAD_TEMP_FOLDER']
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    entity_images_dir = os.path.join(upload_folder, 'entities', nom)
+    os.makedirs(entity_images_dir, exist_ok=True)
+    
+    for page_id, page_data in pages_input.items():
+        zones = page_data.get('zones', [])
+        cadre_reference = page_data.get('cadre_reference')
+        image_filename = page_data.get('image_filename')
+        
+        if not zones:
+            return jsonify({'error': f'Aucune zone définie pour la page "{page_id}"'}), 400
+        
+        # Résoudre le chemin de l'image
+        image_path = None
+        if image_filename:
+            temp_path = os.path.join(temp_folder, image_filename)
+            perm_path = os.path.join(upload_folder, image_filename)
+            if os.path.exists(temp_path):
+                image_path = temp_path
+            elif os.path.exists(perm_path):
+                image_path = perm_path
+        
+        # Fallback: chercher dans la session
+        if not image_path:
+            temp_images = session.get('temp_images_pages', {})
+            if page_id in temp_images and os.path.exists(temp_images[page_id]):
+                image_path = temp_images[page_id]
+        
+        # Copier l'image vers un emplacement permanent
+        permanent_image_path = None
+        if image_path and os.path.exists(image_path):
+            ext = os.path.splitext(image_path)[1] or '.png'
+            permanent_image_path = os.path.join(entity_images_dir, f"{page_id}_reference{ext}")
+            if os.path.abspath(image_path) != os.path.abspath(permanent_image_path):
+                shutil.copy2(image_path, permanent_image_path)
+                current_app.logger.info(f"✅ Image {page_id} copiée vers: {permanent_image_path}")
+        
+        # Extraire et sauvegarder les templates d'ancres image si définis
+        if cadre_reference and permanent_image_path and os.path.exists(permanent_image_path):
+            templates_dir = os.path.join(upload_folder, 'templates', nom)
+            for anchor_type in ['haut', 'droite', 'gauche', 'bas']:
+                anchor = cadre_reference.get(anchor_type, {})
+                template_coords = anchor.get('template_coords')
+                if template_coords and len(template_coords) == 4:
+                    template_filename = f"{page_id}_{anchor_type}_template.png"
+                    template_path = os.path.join(templates_dir, template_filename)
+                    if extract_and_save_template(permanent_image_path, template_coords, template_path):
+                        cadre_reference[anchor_type]['template_path'] = f"templates/{nom}/{template_filename}"
+                        current_app.logger.info(f"✅ Template {page_id}/{anchor_type} sauvegardé: {template_path}")
+        
+        pages_prepared[page_id] = {
+            'zones': zones,
+            'image_path': permanent_image_path,
+            'cadre_reference': cadre_reference
+        }
+    
+    try:
+        manager = get_manager()
+        manager.sauvegarder_entite_composite(nom, pages_prepared, description=description, appariement=appariement)
+        
+        # Nettoyer la session
+        session.pop('temp_images_pages', None)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
