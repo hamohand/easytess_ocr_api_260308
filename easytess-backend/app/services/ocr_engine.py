@@ -31,6 +31,9 @@ def upscale_for_ocr(img, min_height=100, target_height=200):
     
     w, h = img.size
     
+    if h <= 0 or w <= 0:
+        return img
+        
     if h < min_height:
         # Calculer le facteur d'échelle pour atteindre target_height
         scale = target_height / h
@@ -1136,8 +1139,9 @@ def get_absolute_coords(coords, img_w, img_h):
     """
     x1, y1, x2, y2 = coords
     
-    # Détection automatique : si toutes les valeurs sont <= 1.0, on suppose du relatif
-    if all(v <= 1.0 for v in coords):
+    # Détection automatique : si toutes les valeurs sont <= 5.0 (permet de gérer les légers
+    # dépassements > 1.0 suite aux transformations de repère), on suppose du relatif
+    if all(abs(v) <= 5.0 for v in coords):
         return (
             int(x1 * img_w),
             int(y1 * img_h),
