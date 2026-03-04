@@ -85,8 +85,17 @@ python test_document_extraction.py [fichier.pdf ou fichier.docx]
 
 ### Backend — Coordonnées (OCR)
 - Les coordonnées des zones sont **relatives** (0.0 à 1.0), pas en pixels
-- Le système AABB utilise 3 ancres (Haut, Droite, Gauche) pour aligner les zones
+- Le système AABB utilise **4 ancres** indépendantes : Haut (Y_min), Bas (Y_max), Gauche (X_min), Droite (X_max)
+- Chaque ancre peut être détectée par : **texte OCR/regex**, **template image (ORB)**, ou **formule de secours (`fallback_rule`)**
 - `analyser_hybride()` rogne physiquement l'image selon le cadre détecté
+
+### Backend — Ancres Algorithmiques (`fallback_rule`)
+- Si une ancre n'est pas trouvée par OCR/template, le champ `fallback_rule` permet de la calculer via une formule mathématique
+- Variables disponibles : `H` (Haut Y), `B` (Bas Y), `G` (Gauche X), `D` (Droite X)
+- Exemples : `H + 0.40`, `H + (D - G) * 1.58`
+- Évaluation sécurisée via `ast.parse` (Python) — seuls les opérateurs arithmétiques sont autorisés
+- Résolution multi-passes (jusqu'à 4 itérations) pour gérer les dépendances croisées entre variables
+- Implémentée dans `entity_routes.py` (`detecter_etiquettes`) et `ocr_engine.py` (`analyser_hybride`)
 
 ### Backend — Extraction de documents
 - `pdf_extractor.py` retourne un tuple `(content, stats)` — l'ancien code ne retournait que `content`
@@ -130,6 +139,8 @@ python test_document_extraction.py [fichier.pdf ou fichier.docx]
 | POST | `/api/export-json-batch` | Export JSON batch |
 | GET/POST | `/api/entites` | Lister / créer entités |
 | GET/PUT/DELETE | `/api/entites/<nom>` | CRUD entité |
+| POST | `/api/detecter-etiquettes` | Détection des ancres AABB (OCR + template + fallback_rule) |
+| POST | `/api/sauvegarder-entite` | Sauvegarde entité avec zones, ancres et fallback_rules |
 
 ### Extraction & Conversion de documents
 

@@ -17,6 +17,7 @@ export interface EtiquetteReference {
     template_coords?: [number, number, number, number]; // NEW: Image template region [x1, y1, x2, y2] relative (0-1)
     offset_x?: number;                       // Décalage X en pixels (optionnel)
     offset_y?: number;                       // Décalage Y en pixels (optionnel)
+    fallback_rule?: string;                  // NOUVEAU: Règle de calcul algorithmique (ex: "H + 0.35")
 }
 
 // Cadre de référence pour définir le système de coordonnées

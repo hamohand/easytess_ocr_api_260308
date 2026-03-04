@@ -775,16 +775,18 @@ def analyser_hybride(image_path, zones_config, cadre_reference=None):
             
             labels = ref_data.get('labels', [])
             template_path = ref_data.get('template_path')
+            fallback_rule = ref_data.get('fallback_rule', '')
             
-            # Ajouter si labels OU template présent
-            if labels or template_path:
+            # Ajouter si labels OU template présent OU fallback_rule
+            if labels or template_path or fallback_rule:
                 conf = {
                     'id': anchor_id, 
                     'labels': labels, 
                     'position_base': ref_data.get('position_base', default_pos),
                     'template_path': template_path,
                     'offset_x': ref_data.get('offset_x', 0),
-                    'offset_y': ref_data.get('offset_y', 0)
+                    'offset_y': ref_data.get('offset_y', 0),
+                    'fallback_rule': fallback_rule
                 }
                 ancres_config.append(conf)
                 
@@ -852,38 +854,85 @@ def analyser_hybride(image_path, zones_config, cadre_reference=None):
                 return None, str(e)
 
         # Calculer la transformation de coordonnées (Unified Logic)
-        # On consruit les 4 bornes (Top, Bottom, Left, Right)
-        # Priority: Detected Anchor > Legacy Anchor > Image Edge
+        # On consruit les 4 bornes relatives (Top, Bottom, Left, Right)
+        # Priority: Detected Anchor > Fallback Rule > Image Edge
         
         img_w, img_h = img_dims
         
-        # 1. TOP (Y Min)
+        known_rels = {'H': None, 'B': None, 'G': None, 'D': None}
+        fallback_rules = {
+            'H': cadre_reference.get('haut', {}).get('fallback_rule') if cadre_reference else None,
+            'B': cadre_reference.get('bas', {}).get('fallback_rule') if cadre_reference else None,
+            'G': cadre_reference.get('gauche', {}).get('fallback_rule') if cadre_reference else None,
+            'D': cadre_reference.get('droite', {}).get('fallback_rule') if cadre_reference else None
+        }
+        
         if 'haut' in etiquettes_detectees and etiquettes_detectees['haut']['found']:
-            y_ref_min = etiquettes_detectees['haut']['y_min'] * img_h
-        else:
-            y_ref_min = 0 # Default to Image Top
-            
-        # 2. BOTTOM (Y Max)
+            known_rels['H'] = etiquettes_detectees['haut']['y_min']
         if 'bas' in etiquettes_detectees and etiquettes_detectees['bas']['found']:
-            y_ref_max = etiquettes_detectees['bas']['y_max'] * img_h
-        elif 'gauche_bas' in etiquettes_detectees and etiquettes_detectees['gauche_bas']['found']:
-             y_ref_max = etiquettes_detectees['gauche_bas']['y_max'] * img_h
-        else:
-            y_ref_max = img_h # Default to Image Bottom
-            
-        # 3. LEFT (X Min)
+            known_rels['B'] = etiquettes_detectees['bas']['y_max']
         if 'gauche' in etiquettes_detectees and etiquettes_detectees['gauche']['found']:
-            x_ref_min = etiquettes_detectees['gauche']['x_min'] * img_w
-        elif 'gauche_bas' in etiquettes_detectees and etiquettes_detectees['gauche_bas']['found']:
-             x_ref_min = etiquettes_detectees['gauche_bas']['x_min'] * img_w
-        else:
-            x_ref_min = 0 # Default to Image Left
-            
-        # 4. RIGHT (X Max)
+            known_rels['G'] = etiquettes_detectees['gauche']['x_min']
         if 'droite' in etiquettes_detectees and etiquettes_detectees['droite']['found']:
-            x_ref_max = etiquettes_detectees['droite']['x_max'] * img_w
-        else:
-            x_ref_max = img_w # Default to Image Right
+            known_rels['D'] = etiquettes_detectees['droite']['x_max']
+            
+        # Support legacy "gauche_bas"
+        if 'gauche_bas' in etiquettes_detectees and etiquettes_detectees['gauche_bas']['found']:
+            if known_rels['G'] is None: known_rels['G'] = etiquettes_detectees['gauche_bas']['x_min']
+            if known_rels['B'] is None: known_rels['B'] = etiquettes_detectees['gauche_bas']['y_max']
+            
+        # Post-process fallback rules
+        import ast
+        def safe_eval(expr, variables):
+            if not expr: return None
+            try:
+                node = ast.parse(expr, mode='eval').body
+                def _eval(node):
+                    if hasattr(ast, 'Constant') and isinstance(node, ast.Constant): # Python 3.8+
+                        return node.value
+                    elif getattr(ast, 'Num', None) and isinstance(node, getattr(ast, 'Num')): # Older python
+                        return node.n
+                    elif isinstance(node, ast.Name):
+                        if node.id in variables and variables[node.id] is not None:
+                            return float(variables[node.id])
+                        raise ValueError(f"Variable {node.id} manquante pour la formule de secours.")
+                    elif isinstance(node, ast.BinOp):
+                        left = _eval(node.left)
+                        right = _eval(node.right)
+                        if isinstance(node.op, ast.Add): return left + right
+                        elif isinstance(node.op, ast.Sub): return left - right
+                        elif isinstance(node.op, ast.Mult): return left * right
+                        elif isinstance(node.op, ast.Div): return left / right
+                        else: raise ValueError("Opérateur non supporté")
+                    elif isinstance(node, ast.UnaryOp):
+                        if isinstance(node.op, ast.USub): return -_eval(node.operand)
+                        elif isinstance(node.op, ast.UAdd): return _eval(node.operand)
+                    raise ValueError("Expression non supportée")
+                return _eval(node)
+            except Exception as e:
+                logger.error(f"Erreur évaluation fallback '{expr}': {e}")
+                return None
+
+        # Resolve up to 4 times for dependencies
+        for _ in range(4):
+            progress = False
+            for var in ['H', 'B', 'G', 'D']:
+                if known_rels[var] is None and fallback_rules.get(var):
+                    val = safe_eval(fallback_rules[var], known_rels)
+                    if val is not None:
+                        known_rels[var] = val
+                        progress = True
+                        logger.info(f"✨ Ancre algorithmique {var} calculée: {val:.4f}")
+            if not progress:
+                break
+                
+        # Transform to pixels
+        y_ref_min = known_rels['H'] * img_h if known_rels['H'] is not None else 0
+        y_ref_max = known_rels['B'] * img_h if known_rels['B'] is not None else img_h
+        x_ref_min = known_rels['G'] * img_w if known_rels['G'] is not None else 0
+        x_ref_max = known_rels['D'] * img_w if known_rels['D'] is not None else img_w
+            
+
             
         
         # Validation des dimensions calculées

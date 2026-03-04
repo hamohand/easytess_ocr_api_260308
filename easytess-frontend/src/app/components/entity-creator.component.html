@@ -133,7 +133,7 @@
                     </div>
                     <div class="input-with-action">
                         <input type="text" [ngModel]="cadreHaut().labels_str"
-                            (ngModelChange)="cadreHaut.set({labels_str: $event, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: cadreHaut().offset_x, offset_y: cadreHaut().offset_y})"
+                            (ngModelChange)="cadreHaut.set({labels_str: $event, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: cadreHaut().offset_x, offset_y: cadreHaut().offset_y, fallback_rule: cadreHaut().fallback_rule})"
                             placeholder="Ex: RÉPUBLIQUE ALGÉRIENNE" class="cadre-input">
                         <button type="button" class="btn-target" [class.active]="activeReferenceSelection() === 'haut'"
                             (click)="startReferenceSelection('haut')"
@@ -167,11 +167,18 @@
                             <label>Offset X:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreHaut().offset_x"
-                                (ngModelChange)="cadreHaut.set({labels_str: cadreHaut().labels_str, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: $event, offset_y: cadreHaut().offset_y})">
+                                (ngModelChange)="cadreHaut.set({labels_str: cadreHaut().labels_str, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: $event, offset_y: cadreHaut().offset_y, fallback_rule: cadreHaut().fallback_rule})">
                             <label>Offset Y:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreHaut().offset_y"
-                                (ngModelChange)="cadreHaut.set({labels_str: cadreHaut().labels_str, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: cadreHaut().offset_x, offset_y: $event})">
+                                (ngModelChange)="cadreHaut.set({labels_str: cadreHaut().labels_str, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: cadreHaut().offset_x, offset_y: $event, fallback_rule: cadreHaut().fallback_rule})">
+                        </div>
+                        <div class="fallback-input" style="margin-top: 5px; font-size: 0.85em;">
+                            <label style="display: block; color: #888; font-size: 0.9em; margin-bottom: 2px;">Secours
+                                (formule mathématique):</label>
+                            <input type="text" class="cadre-input" style="width: 100%; padding: 4px;"
+                                placeholder="ex: B - 0.35 ou H + (D-G)*1.5" [ngModel]="cadreHaut().fallback_rule"
+                                (ngModelChange)="cadreHaut.set({labels_str: cadreHaut().labels_str, position_base: cadreHaut().position_base, template_coords: cadreHaut().template_coords, offset_x: cadreHaut().offset_x, offset_y: cadreHaut().offset_y, fallback_rule: $event})">
                         </div>
                     </div>
                 </div>
@@ -185,7 +192,7 @@
                     </div>
                     <div class="input-with-action">
                         <input type="text" [ngModel]="cadreDroite().labels_str"
-                            (ngModelChange)="cadreDroite.set({labels_str: $event, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: cadreDroite().offset_x, offset_y: cadreDroite().offset_y})"
+                            (ngModelChange)="cadreDroite.set({labels_str: $event, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: cadreDroite().offset_x, offset_y: cadreDroite().offset_y, fallback_rule: cadreDroite().fallback_rule})"
                             placeholder="Ex: P<DZA (texte à droite)" class="cadre-input">
                         <button type="button" class="btn-target"
                             [class.active]="activeReferenceSelection() === 'droite'"
@@ -220,11 +227,18 @@
                             <label>Offset X:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreDroite().offset_x"
-                                (ngModelChange)="cadreDroite.set({labels_str: cadreDroite().labels_str, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: $event, offset_y: cadreDroite().offset_y})">
+                                (ngModelChange)="cadreDroite.set({labels_str: cadreDroite().labels_str, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: $event, offset_y: cadreDroite().offset_y, fallback_rule: cadreDroite().fallback_rule})">
                             <label>Offset Y:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreDroite().offset_y"
-                                (ngModelChange)="cadreDroite.set({labels_str: cadreDroite().labels_str, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: cadreDroite().offset_x, offset_y: $event})">
+                                (ngModelChange)="cadreDroite.set({labels_str: cadreDroite().labels_str, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: cadreDroite().offset_x, offset_y: $event, fallback_rule: cadreDroite().fallback_rule})">
+                        </div>
+                        <div class="fallback-input" style="margin-top: 5px; font-size: 0.85em;">
+                            <label style="display: block; color: #888; font-size: 0.9em; margin-bottom: 2px;">Secours
+                                (formule mathématique):</label>
+                            <input type="text" class="cadre-input" style="width: 100%; padding: 4px;"
+                                placeholder="ex: G + 0.35 ou H + (D-G)*1.5" [ngModel]="cadreDroite().fallback_rule"
+                                (ngModelChange)="cadreDroite.set({labels_str: cadreDroite().labels_str, position_base: cadreDroite().position_base, template_coords: cadreDroite().template_coords, offset_x: cadreDroite().offset_x, offset_y: cadreDroite().offset_y, fallback_rule: $event})">
                         </div>
                     </div>
                 </div>
@@ -239,7 +253,7 @@
                     </div>
                     <div class="input-with-action">
                         <input type="text" [ngModel]="cadreGauche().labels_str"
-                            (ngModelChange)="cadreGauche.set({labels_str: $event, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: cadreGauche().offset_x, offset_y: cadreGauche().offset_y})"
+                            (ngModelChange)="cadreGauche.set({labels_str: $event, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: cadreGauche().offset_x, offset_y: cadreGauche().offset_y, fallback_rule: cadreGauche().fallback_rule})"
                             placeholder="Ex: PHOTO (texte à gauche)" class="cadre-input">
                         <button type="button" class="btn-target"
                             [class.active]="activeReferenceSelection() === 'gauche'"
@@ -274,11 +288,18 @@
                             <label>Offset X:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreGauche().offset_x"
-                                (ngModelChange)="cadreGauche.set({labels_str: cadreGauche().labels_str, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: $event, offset_y: cadreGauche().offset_y})">
+                                (ngModelChange)="cadreGauche.set({labels_str: cadreGauche().labels_str, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: $event, offset_y: cadreGauche().offset_y, fallback_rule: cadreGauche().fallback_rule})">
                             <label>Offset Y:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreGauche().offset_y"
-                                (ngModelChange)="cadreGauche.set({labels_str: cadreGauche().labels_str, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: cadreGauche().offset_x, offset_y: $event})">
+                                (ngModelChange)="cadreGauche.set({labels_str: cadreGauche().labels_str, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: cadreGauche().offset_x, offset_y: $event, fallback_rule: cadreGauche().fallback_rule})">
+                        </div>
+                        <div class="fallback-input" style="margin-top: 5px; font-size: 0.85em;">
+                            <label style="display: block; color: #888; font-size: 0.9em; margin-bottom: 2px;">Secours
+                                (formule mathématique):</label>
+                            <input type="text" class="cadre-input" style="width: 100%; padding: 4px;"
+                                placeholder="ex: D - 0.35 ou G + (D-G)*0" [ngModel]="cadreGauche().fallback_rule"
+                                (ngModelChange)="cadreGauche.set({labels_str: cadreGauche().labels_str, position_base: cadreGauche().position_base, template_coords: cadreGauche().template_coords, offset_x: cadreGauche().offset_x, offset_y: cadreGauche().offset_y, fallback_rule: $event})">
                         </div>
                     </div>
                 </div>
@@ -292,7 +313,7 @@
                     </div>
                     <div class="input-with-action">
                         <input type="text" [ngModel]="cadreBas().labels_str"
-                            (ngModelChange)="cadreBas.set({labels_str: $event, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: cadreBas().offset_x, offset_y: cadreBas().offset_y})"
+                            (ngModelChange)="cadreBas.set({labels_str: $event, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: cadreBas().offset_x, offset_y: cadreBas().offset_y, fallback_rule: cadreBas().fallback_rule})"
                             placeholder="Ex: SIGNATURE (texte en bas)" class="cadre-input">
                         <button type="button" class="btn-target" [class.active]="activeReferenceSelection() === 'bas'"
                             (click)="startReferenceSelection('bas')"
@@ -326,11 +347,18 @@
                             <label>Offset X:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreBas().offset_x"
-                                (ngModelChange)="cadreBas.set({labels_str: cadreBas().labels_str, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: $event, offset_y: cadreBas().offset_y})">
+                                (ngModelChange)="cadreBas.set({labels_str: cadreBas().labels_str, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: $event, offset_y: cadreBas().offset_y, fallback_rule: cadreBas().fallback_rule})">
                             <label>Offset Y:</label>
                             <input type="number" class="cadre-input" style="width: 50px; padding: 2px;"
                                 [ngModel]="cadreBas().offset_y"
-                                (ngModelChange)="cadreBas.set({labels_str: cadreBas().labels_str, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: cadreBas().offset_x, offset_y: $event})">
+                                (ngModelChange)="cadreBas.set({labels_str: cadreBas().labels_str, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: cadreBas().offset_x, offset_y: $event, fallback_rule: cadreBas().fallback_rule})">
+                        </div>
+                        <div class="fallback-input" style="margin-top: 5px; font-size: 0.85em;">
+                            <label style="display: block; color: #888; font-size: 0.9em; margin-bottom: 2px;">Secours
+                                (formule mathématique):</label>
+                            <input type="text" class="cadre-input" style="width: 100%; padding: 4px;"
+                                placeholder="ex: H + 0.35 ou H + (D-G)*1.5" [ngModel]="cadreBas().fallback_rule"
+                                (ngModelChange)="cadreBas.set({labels_str: cadreBas().labels_str, position_base: cadreBas().position_base, template_coords: cadreBas().template_coords, offset_x: cadreBas().offset_x, offset_y: cadreBas().offset_y, fallback_rule: $event})">
                         </div>
                     </div>
                 </div>

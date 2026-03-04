@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de ce projet seront documentées dans ce fichier.
 
+## [2.6.0] - 2026-03-04
+
+### 🎉 Ajouts majeurs
+
+#### Ancrages Algorithmiques (Computed Anchors)
+- **Système AABB à 4 Ancres** : Évolution de l'AABB pour supporter 4 ancres indépendantes (Haut, Bas, Gauche, Droite) au lieu de 3.
+- **Formules de secours (`fallback_rule`)** : Possibilité de définir un bord via une formule mathématique relative (ex: `H + 0.40`) si le mot clé OCR n'est pas détecté physiquement.
+- **Résolution Multi-passes** : Moteur Python avec exécution sécurisée de l'`ast` permettant aux formules mathématiques de dépendre les unes des autres (jusqu'à 4 boucles de dépendances croisées).
+- **Frontend** : Nouvelle zone d'interface graphique dans le Créateur d'Entité pour saisir la règle de secours algorithmique. Prévisualisation en direct de l'ancre virtuelle calculée.
+
 ## [2.5.0] - 2026-02-25
 
 ### 🎉 Ajouts majeurs

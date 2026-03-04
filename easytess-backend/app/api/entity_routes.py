@@ -179,12 +179,15 @@ def detecter_etiquettes():
                 offset_y = float(config.get('offset_y', 0))
             except (ValueError, TypeError):
                 offset_y = 0.0
+                
+            fallback_rule = config.get('fallback_rule', '')
         
         anchor_conf = {
             'id': etiquette_id,
             'labels': labels,
             'offset_x': offset_x,
-            'offset_y': offset_y
+            'offset_y': offset_y,
+            'fallback_rule': fallback_rule
         }
         
         # Templates de détection temporaires -> uploads_temp
@@ -245,6 +248,80 @@ def detecter_etiquettes():
                     os.remove(f)
                 except:
                     pass
+
+        # === EVALUATION FALLBACK RULLES (AST) ===
+        # Comme dans ocr_engine.py, on résout les fallback_rule 
+        img_w, img_h = img_dims
+        known_rels = {'H': None, 'B': None, 'G': None, 'D': None}
+        fallback_rules = {
+            'H': etiquettes.get('haut', {}).get('fallback_rule') if 'haut' in etiquettes else None,
+            'B': etiquettes.get('bas', {}).get('fallback_rule') if 'bas' in etiquettes else None,
+            'G': etiquettes.get('gauche', {}).get('fallback_rule') if 'gauche' in etiquettes else None,
+            'D': etiquettes.get('droite', {}).get('fallback_rule') if 'droite' in etiquettes else None
+        }
+
+        # Remplir variables connues 
+        if 'haut' in etiquettes_detectees and etiquettes_detectees['haut'].get('found'):
+            known_rels['H'] = etiquettes_detectees['haut']['y_min']
+        if 'bas' in etiquettes_detectees and etiquettes_detectees['bas'].get('found'):
+            known_rels['B'] = etiquettes_detectees['bas']['y_max']
+        if 'gauche' in etiquettes_detectees and etiquettes_detectees['gauche'].get('found'):
+            known_rels['G'] = etiquettes_detectees['gauche']['x_min']
+        if 'droite' in etiquettes_detectees and etiquettes_detectees['droite'].get('found'):
+            known_rels['D'] = etiquettes_detectees['droite']['x_max']
+            
+        import ast
+        def safe_eval(expr, variables):
+            if not expr: return None
+            try:
+                node = ast.parse(expr, mode='eval').body
+                def _eval(node):
+                    if hasattr(ast, 'Constant') and isinstance(node, ast.Constant): return node.value
+                    elif getattr(ast, 'Num', None) and isinstance(node, getattr(ast, 'Num')): return node.n
+                    elif isinstance(node, ast.Name):
+                        if node.id in variables and variables[node.id] is not None: return float(variables[node.id])
+                        raise ValueError(f"Var manquante")
+                    elif isinstance(node, ast.BinOp):
+                        left = _eval(node.left)
+                        right = _eval(node.right)
+                        if isinstance(node.op, ast.Add): return left + right
+                        elif isinstance(node.op, ast.Sub): return left - right
+                        elif isinstance(node.op, ast.Mult): return left * right
+                        elif isinstance(node.op, ast.Div): return left / right
+                    elif isinstance(node, ast.UnaryOp):
+                        if isinstance(node.op, ast.USub): return -_eval(node.operand)
+                        elif isinstance(node.op, ast.UAdd): return _eval(node.operand)
+                    raise ValueError("Non supporté")
+                return _eval(node)
+            except Exception as e:
+                return None
+
+        # Resolve up to 4 times
+        for _ in range(4):
+            progress = False
+            for var in ['H', 'B', 'G', 'D']:
+                if known_rels[var] is None and fallback_rules.get(var):
+                    val = safe_eval(fallback_rules[var], known_rels)
+                    if val is not None:
+                        known_rels[var] = val
+                        progress = True
+                        # Inject back into detectees
+                        mapping = {'H':'haut', 'B':'bas', 'G':'gauche', 'D':'droite'}
+                        tag = mapping[var]
+                        if tag not in etiquettes_detectees:
+                            etiquettes_detectees[tag] = {}
+                        etiquettes_detectees[tag]['found'] = True
+                        if tag == 'haut':
+                            etiquettes_detectees[tag].update({'y_min': val, 'y_max': val, 'x_min': 0.0, 'x_max': 1.0, 'x': 0.5, 'y': val})
+                        if tag == 'bas':
+                            etiquettes_detectees[tag].update({'y_min': val, 'y_max': val, 'x_min': 0.0, 'x_max': 1.0, 'x': 0.5, 'y': val})
+                        if tag == 'gauche':
+                            etiquettes_detectees[tag].update({'x_min': val, 'x_max': val, 'y_min': 0.0, 'y_max': 1.0, 'x': val, 'y': 0.5})
+                        if tag == 'droite':
+                            etiquettes_detectees[tag].update({'x_min': val, 'x_max': val, 'y_min': 0.0, 'y_max': 1.0, 'x': val, 'y': 0.5})
+                        
+            if not progress:
+                break
         
         # Formater la réponse
         positions = {}
@@ -282,7 +359,7 @@ def detecter_etiquettes():
                     'y': y,
                     'found': det.get('found', False),
                     'text': det.get('text', ''),
-                    'bbox': [det.get('x_min'), det.get('y_min'), det.get('x_max'), det.get('y_max')] if det.get('found') and 'x_min' in det else None
+                    'bbox': [det.get('x_min', 0), det.get('y_min', 0), det.get('x_max', 0), det.get('y_max', 0)] if det.get('found') and 'x_min' in det else None
                 }
             else:
                 positions[etiquette_id] = {'x': 0, 'y': 0, 'found': False}

@@ -14,7 +14,8 @@ Plateforme complète d'analyse OCR et d'extraction de contenu documentaire. Deux
 - **Gestion des entités** : Modèles d'extraction personnalisés avec zones dessinées
 - **Types de zones** : Texte, QR Code, Code-barres
 - **Analyse par lot** : Fichier unique, multi-fichiers, dossier entier avec SSE temps réel
-- **Système AABB** : Cadre de référence à 3 ancres (Haut, Droite, Gauche)
+- **Système AABB à 4 Ancres** : Cadre de référence complet (Haut, Bas, Gauche, Droite)
+- **Ancres Algorithmiques** : Résolution mathématique des bords non détectés (`fallback_rule`)
 - **Export JSON** : Résultats détaillés avec confiance et moteur utilisé
 
 ### 📄 Section Extraction de Documents
@@ -257,6 +258,7 @@ Le système utilise automatiquement :
 - [x] ~~Extraction de contenu PDF/DOCX~~ ✅ v2.5.0
 - [x] ~~Conversion PDF → Word~~ ✅ v2.5.0
 - [x] ~~Détection avancée des tableaux~~ ✅ v2.5.0
+- [x] ~~Ancrages Algorithmiques (Computed Anchors)~~ ✅ v2.6.0
 - [ ] Support multi-pages complet pour l'OCR (actuellement 1ère page uniquement)
 - [ ] Détection de codes-barres avec zbar
 - [ ] Support de plus de langues OCR
@@ -275,5 +277,5 @@ Pour toute question ou suggestion, contactez l'équipe de développement.
 
 ---
 
-**Version** : 2.5.0 (extraction de documents, conversion PDF→Word, détection avancée des tableaux)  
-**Dernière mise à jour** : Février 2026
+**Version** : 2.6.0 (Ancrages Algorithmiques, Extraction de documents, conversion PDF→Word, détection avancée des tableaux)  
+**Dernière mise à jour** : Mars 2026

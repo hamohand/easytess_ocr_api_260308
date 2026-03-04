@@ -1,0 +1,118 @@
+{
+  "nom": "cni_secours_01",
+  "description": "",
+  "type": "simple",
+  "date_creation": "2026-03-04T19:53:15.767807",
+  "image_reference": "C:\\Users\\hamoh\\Documents\\projets\\frida\\frida-micros\\easytess_ocr_api\\easytess-backend\\uploads\\entities\\cni_secours_01\\reference.jpeg",
+  "zones": [
+    {
+      "id": 1772650263852,
+      "nom": "nom",
+      "type": "text",
+      "lang": "ara",
+      "preprocess": "arabic_textured",
+      "coords": [
+        0.31079511942549704,
+        0.6252550680010264,
+        0.9118398955448999,
+        0.7022550680010264
+      ]
+    },
+    {
+      "id": 1772650308057,
+      "nom": "prenom",
+      "type": "text",
+      "lang": "ara",
+      "preprocess": "arabic_textured",
+      "coords": [
+        0.31527273136579553,
+        0.7355884013343598,
+        0.9118398955448999,
+        0.8204772902232487
+      ]
+    },
+    {
+      "id": 1772650346786,
+      "nom": "numPiece",
+      "type": "text",
+      "lang": "fra",
+      "preprocess": "latin_simple",
+      "coords": [
+        0.0022876567389298924,
+        0.19025506800102643,
+        0.27243691047027313,
+        0.2645884013343598
+      ]
+    }
+  ],
+  "cadre_reference": {
+    "haut": {
+      "labels": [],
+      "position_base": [
+        0.94947209653092,
+        0.04157043879907621
+      ],
+      "template_coords": [
+        0.9258,
+        0.0421,
+        0.9756,
+        0.0929
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "template_path": "templates/cni_secours_01/haut_template.png"
+    },
+    "droite": {
+      "labels": [],
+      "position_base": [
+        0.975867269984917,
+        0.06466512702078522
+      ],
+      "template_coords": [
+        0.9228,
+        0.0387,
+        0.9771,
+        0.0942
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "template_path": "templates/cni_secours_01/droite_template.png"
+    },
+    "gauche": {
+      "labels": [],
+      "position_base": [
+        0.305867269984917,
+        0.5
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "fallback_rule": "D - 0.67"
+    },
+    "bas": {
+      "labels": [],
+      "position_base": [
+        0.5,
+        0.9415704387990762
+      ],
+      "offset_x": 0,
+      "offset_y": 0,
+      "fallback_rule": "H +0.90"
+    },
+    "image_base_dimensions": {
+      "width": 663,
+      "height": 433
+    },
+    "dimensions_absolues": {
+      "largeur": 444,
+      "hauteur": 390,
+      "angle": 0
+    }
+  },
+  "metadata": {
+    "nombre_zones": 3,
+    "image_dimensions": {
+      "width": 663,
+      "height": 433
+    }
+  }
+}
