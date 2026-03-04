@@ -152,7 +152,16 @@ export class EntityCreatorComponent implements AfterViewInit, OnInit {
     loadImageOnCanvas(url: string) {
         console.log('Chargement image depuis URL:', url);
         const img = new Image();
-        // img.crossOrigin = "Anonymous"; // Désactivé pour éviter les erreurs CORS sur les fichiers statiques
+        let finalUrl = url;
+
+        // Ne définir crossOrigin que pour les URLs distantes (backend),
+        // car cela fait échouer le chargement silencieusement sur les urls blob: locaux
+        if (url.startsWith('http')) {
+            img.crossOrigin = "Anonymous";
+            // Ajout d'un paramètre anti-cache pour forcer le navigateur à refaire
+            // la requête avec les bons headers CORS (évite les bugs du cache 304)
+            finalUrl = url + (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+        }
 
         img.onload = () => {
             this.img = img;
@@ -160,27 +169,33 @@ export class EntityCreatorComponent implements AfterViewInit, OnInit {
             this.imgWidth = img.width;
             this.imgHeight = img.height;
 
-            const canvas = this.canvasRef.nativeElement;
+            const tryDraw = () => {
+                if (this.canvasRef && this.canvasRef.nativeElement) {
+                    const canvas = this.canvasRef.nativeElement;
+                    this.ctx = canvas.getContext('2d');
 
-            // Initialiser le contexte du canvas (important car le canvas n'existe qu'après le rendu @if)
-            this.ctx = canvas.getContext('2d');
+                    // Resize canvas to fit image
+                    const maxWidth = 800;
+                    const scale = Math.min(1, maxWidth / img.width);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
 
-            // Resize canvas to fit image
-            const maxWidth = 800;
-            const scale = Math.min(1, maxWidth / img.width);
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-
-            console.log(`📐 Image dimensions: ${this.imgWidth}x${this.imgHeight}, Canvas: ${canvas.width}x${canvas.height}`);
-            this.redrawCanvas();
+                    console.log(`📐 Image dimensions: ${this.imgWidth}x${this.imgHeight}, Canvas: ${canvas.width}x${canvas.height}`);
+                    this.redrawCanvas();
+                } else {
+                    console.log('Waiting for canvas initialization...');
+                    setTimeout(tryDraw, 50);
+                }
+            };
+            tryDraw();
         };
 
         img.onerror = (e) => {
-            console.error('Erreur chargement image:', url, e);
-            this.errorMessage.set(`Impossible de charger l'image. Vérifiez que le backend est accessible. URL: ${url}`);
+            console.error('Erreur chargement image:', finalUrl, e);
+            this.errorMessage.set(`Impossible de charger l'image. Vérifiez que le backend est accessible. URL: ${finalUrl}`);
         };
 
-        img.src = url;
+        img.src = finalUrl;
     }
 
     /**
@@ -1125,20 +1140,28 @@ export class EntityCreatorComponent implements AfterViewInit, OnInit {
 
                 // Charger l'image de référence si elle existe
                 if (entite.image_reference) {
-                    // Extraire le chemin relatif au dossier 'uploads/'
                     const normalized = entite.image_reference.replace(/\\/g, '/');
-                    const uploadsIndex = normalized.indexOf('/uploads/');
-                    let relativeFilename: string;
-                    if (uploadsIndex !== -1) {
-                        relativeFilename = normalized.substring(uploadsIndex + '/uploads/'.length);
+                    let imageUrl = '';
+                    let relativeFilename = normalized.split('/').pop() || normalized;
+
+                    if (normalized.includes('/entities/')) {
+                        // Cas normal: sauvegardée dynamiquement
+                        relativeFilename = 'entities/' + normalized.split('/entities/')[1];
+                        imageUrl = `http://localhost:8082/uploads/${relativeFilename}`;
+                    } else if (normalized.includes('temp_entite_') && normalized.includes('/uploads/')) {
+                        // Cas legacy: sauvegardée temporairement et JSON pointe vers /uploads/temp_entite_...
+                        imageUrl = `http://localhost:8082/uploads_temp/${relativeFilename}`;
                     } else {
-                        relativeFilename = normalized.split('/').pop() || normalized;
+                        // Fallback
+                        imageUrl = `http://localhost:8082/uploads/${relativeFilename}`;
                     }
-                    const imageUrl = `http://localhost:8082/uploads/${relativeFilename}`;
+
                     this.imageUrl.set(imageUrl);
-                    // Pour la détection, on utilise le chemin relatif au dossier uploads
                     this.uploadedImageFilename.set(relativeFilename);
 
+                    // Re-ajout du setTimeout: bien que j'aie ajouté un retry interne, 
+                    // cela peut quand même bloquer ou rater si la boucle n'est pas initiée 
+                    // après le premier tick Angular pour le rendu du @if
                     setTimeout(() => {
                         this.loadImageOnCanvas(imageUrl);
                     }, 100);

@@ -45,7 +45,8 @@
                 <select [(ngModel)]="selectedRecto" (ngModelChange)="onRectoSelected()">
                     <option value="">— Sélectionner une entité simple —</option>
                     @for (ent of simpleEntities(); track ent.nom) {
-                    <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }} ({{ ent.zones?.length || 0 }}
+                    <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }} ({{ (ent.zones || []).length
+                        || 0 }}
                         zones)</option>
                     }
                 </select>
@@ -59,7 +60,8 @@
                 <select [(ngModel)]="selectedVerso" (ngModelChange)="onVersoSelected()">
                     <option value="">— Sélectionner une entité simple —</option>
                     @for (ent of simpleEntities(); track ent.nom) {
-                    <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }} ({{ ent.zones?.length || 0 }}
+                    <option [value]="ent.nom">{{ ent.nom }} — {{ ent.description || '' }} ({{ (ent.zones || []).length
+                        || 0 }}
                         zones)</option>
                     }
                 </select>

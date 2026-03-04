@@ -40,7 +40,7 @@
                 <div class="entity-info">
                     <h4>{{ entite.nom }}</h4>
                     <p class="entity-desc">{{ entite.description || 'Aucune description' }}</p>
-                    <span class="zones-count">{{ entite.zones.length }} zone(s)</span>
+                    <span class="zones-count">{{ (entite.zones || []).length }} zone(s)</span>
                 </div>
                 <div class="entity-actions">
                     <button class="btn btn-small btn-primary" (click)="chargerEntite(entite.nom)" title="Modifier">
