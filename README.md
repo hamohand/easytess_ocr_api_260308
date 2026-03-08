@@ -279,3 +279,7 @@ Pour toute question ou suggestion, contactez l'équipe de développement.
 
 **Version** : 2.6.0 (Ancrages Algorithmiques, Extraction de documents, conversion PDF→Word, détection avancée des tableaux)  
 **Dernière mise à jour** : Mars 2026
+
+# ********************************************* **
+**Fonctionnement correct de l'OCR en arabe** : à la date du 03 Mars 2026, non modifié depuis.
+# ********************************************* ** 
